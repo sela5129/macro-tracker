@@ -85,6 +85,24 @@
   .cat-hdr .chev { display:inline-block; transition:transform 0.15s; }
   .cat-hdr.open .chev { transform:rotate(180deg); }
   .browse-item { padding-left:20px; border-top:1px solid rgba(0,0,0,0.08); }
+  .browse-item-row { display:flex; align-items:stretch; border-top:1px solid rgba(0,0,0,0.08); }
+  .browse-item-main { flex:1; min-width:0; text-align:left; padding:10px 8px 10px 20px; background:none; border:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:14px; }
+  .browse-item-main .cal { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-left:8px; flex-shrink:0; }
+  .row-actions { display:flex; align-items:center; gap:2px; padding-right:8px; flex-shrink:0; }
+  .action-btn { background:none; border:0; font-size:15px; padding:8px; color:rgba(0,0,0,0.4); cursor:pointer; }
+  .action-btn:active { color:#111; }
+  .edit-food-panel { margin:8px; background:#FAFAF6; border:2px solid #111; padding:12px; }
+  .edit-food-panel .ttl { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:8px; }
+  .edit-food-panel input, .edit-food-panel select { border:2px solid rgba(0,0,0,0.2); padding:6px 8px; font-size:13px; width:100%; margin-bottom:6px; }
+  .edit-food-panel .btn-row { display:flex; gap:8px; margin-top:4px; }
+  .edit-food-panel .btn-row button { flex:1; padding:9px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; border:0; cursor:pointer; }
+  .edit-food-panel .save-btn { background:#111; color:#fff; }
+  .edit-food-panel .cancel-btn { background:#eee; color:#111; }
+  .delete-confirm { margin:0 0 0 0; background:#F4D9D2; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid rgba(0,0,0,0.1); }
+  .delete-confirm span { font-size:12px; flex:1; }
+  .delete-confirm button { font-size:11px; font-weight:700; text-transform:uppercase; padding:6px 10px; border:0; cursor:pointer; }
+  .delete-confirm .yes-btn { background:#9C2B1B; color:#fff; }
+  .delete-confirm .no-btn { background:#fff; border:1px solid rgba(0,0,0,0.2); }
   .custom-form { margin-top:8px; background:#fff; border:2px solid #111; padding:16px; }
   .custom-form .ttl { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:4px; }
   .custom-form .sub { font-size:11px; color:rgba(0,0,0,0.5); margin-bottom:12px; }
@@ -119,6 +137,7 @@
   .entries-hdr { display:flex; align-items:center; justify-content:space-between; margin:20px 4px 8px; }
   .entries-hdr .lbl { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.6); }
   .entries-hdr .status { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:#2F6B45; }
+  .clear-day-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:#9C2B1B; background:none; border:0; text-decoration:underline; cursor:pointer; }
   .empty-state { text-align:center; color:rgba(0,0,0,0.3); font-size:14px; padding:32px 16px; border:2px dashed rgba(0,0,0,0.15); }
   .entry { background:#fff; border:1px solid rgba(0,0,0,0.2); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .entry .name { font-size:14px; font-weight:600; }
@@ -332,14 +351,13 @@ var CATEGORY = {'Avacado':'Fruits','Banana':'Fruits','Black berries':'Fruits','B
 
 var CATEGORY_ORDER = ['Fruits','Vegetables','Meat, Poultry & Seafood','Eggs & Dairy','Grains, Bread & Cereal','Protein Shakes & Bars','Nuts, Seeds & Spreads','Sauces & Condiments','Snacks','Sweets & Desserts','Prepared Meals & Fast Food','Drinks','Other'];
 
-var FOODS_BY_CATEGORY = {};
+var IDS_BY_CATEGORY = {};
 CATEGORY_ORDER.forEach(function(cat) {
-  FOODS_BY_CATEGORY[cat] = FOODS.filter(function(f){ return (CATEGORY[f.n] || 'Other') === cat; })
-    .sort(function(a,b){ return a.n.localeCompare(b.n); });
+  IDS_BY_CATEGORY[cat] = FOODS.filter(function(f){ return (CATEGORY[f.n] || 'Other') === cat; }).map(function(f){ return f.id; });
 });
 
 var UNIT_LABEL = { g: 'g', oz: 'oz', ml: 'ml', serving: 'serving' };
-var UNIT_STEP = { g: 5, oz: 1, ml: 10, serving: 1 };
+var UNIT_STEP = { g: 5, oz: 0.5, ml: 10, serving: 0.5 };
 var UNIT_DEFAULT = { g: 100, oz: 4, ml: 250, serving: 1 };
 
 // ---------------------------------------------------------------------------
@@ -397,6 +415,9 @@ var state = {
   burned: 0,
   customFoods: lsGet('customFoods', []),
   recentFoods: lsGet('recentFoods', []),
+  foodEdits: lsGet('foodEdits', {}),       // overrides for base spreadsheet foods, keyed by id
+  deletedFoodIds: lsGet('deletedFoodIds', []), // hidden base spreadsheet foods, by id
+  pairCounts: lsGet('pairCounts', {}),     // co-occurrence counts for "frequently logged together"
   goals: lsGet('goals', { protein: '', calories: '' }),
   query: '',
   mode: 'search',
@@ -408,6 +429,9 @@ var state = {
   saveCustomForFuture: true,
   showGoals: false,
   toast: '',
+  editingFood: null,        // food object currently being edited, or null
+  editDraft: null,          // { n, u, p, c, cb, f } draft while editing
+  confirmDeleteId: null,    // food id pending delete confirmation
 };
 state.openCats[CATEGORY_ORDER[0]] = true;
 
@@ -418,7 +442,63 @@ function setEntries(next) { lsSet(entriesKey(), next); }
 function getBurned() { return lsGet('burned:' + state.logDate, 0); }
 function setBurned(v) { lsSet('burned:' + state.logDate, v); }
 
-function allFoods() { return state.customFoods.concat(FOODS); }
+function isCustomId(id) { return String(id).indexOf('custom-') === 0; }
+
+function getFoodById(id) {
+  if (state.deletedFoodIds.some(function(d){ return String(d) === String(id); })) return null;
+  var base = FOODS.find(function(f){ return String(f.id) === String(id); });
+  if (!base) return null;
+  var o = state.foodEdits[String(id)];
+  return o ? Object.assign({}, base, o) : base;
+}
+
+// effective base-food list: deletions hidden, edits applied — without touching the original FOODS array
+function effectiveBaseFoods() {
+  return FOODS.filter(function(f) {
+    return !state.deletedFoodIds.some(function(d){ return String(d) === String(f.id); });
+  }).map(function(f) {
+    var o = state.foodEdits[String(f.id)];
+    return o ? Object.assign({}, f, o) : f;
+  });
+}
+
+function allFoods() { return state.customFoods.concat(effectiveBaseFoods()); }
+
+function identityKey(food) { return food.n.toLowerCase() + '::' + food.u; }
+function pairKey(keyA, keyB) { return [keyA, keyB].sort().join('||'); }
+
+function recordPair(newEntry, existingEntries) {
+  var newKey = identityKey(newEntry);
+  existingEntries.forEach(function(e) {
+    var otherKey = identityKey(e);
+    if (otherKey === newKey) return;
+    var k = pairKey(newKey, otherKey);
+    state.pairCounts[k] = (state.pairCounts[k] || 0) + 1;
+  });
+  lsSet('pairCounts', state.pairCounts);
+}
+
+function frequentlyTogether(entries) {
+  if (!entries.length) return [];
+  var todayKeys = entries.map(identityKey);
+  var scores = {};
+  Object.keys(state.pairCounts).forEach(function(k) {
+    var parts = k.split('||');
+    todayKeys.forEach(function(tk) {
+      var other = null;
+      if (parts[0] === tk) other = parts[1];
+      else if (parts[1] === tk) other = parts[0];
+      if (other && todayKeys.indexOf(other) === -1) {
+        scores[other] = (scores[other] || 0) + state.pairCounts[k];
+      }
+    });
+  });
+  var ranked = Object.keys(scores).sort(function(a, b) { return scores[b] - scores[a]; }).slice(0, 6);
+  var foods = allFoods();
+  return ranked.map(function(key) {
+    return foods.find(function(f) { return identityKey(f) === key; });
+  }).filter(Boolean);
+}
 
 function computeTotals(entries) {
   var t = entries.reduce(function(acc, e) {
@@ -437,6 +517,22 @@ var root = document.getElementById('root');
 function macroRow(label, value, unit, color) {
   return '<div class="macro-row"><span class="lbl">' + label + '</span>' +
     '<span class="val" style="color:' + color + '">' + round1(value) + unit + '</span></div>';
+}
+
+function browseRow(f) {
+  var row = '<div class="browse-item-row">' +
+    '<button class="browse-item-main" data-action="pickFoodAndSearch" data-id="' + esc(f.id) + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>' +
+    '<div class="row-actions">' +
+      '<button class="action-btn" data-action="editFood" data-id="' + esc(f.id) + '" aria-label="Edit">\u270e</button>' +
+      '<button class="action-btn" data-action="deleteFood" data-id="' + esc(f.id) + '" aria-label="Delete">\uD83D\uDDD1</button>' +
+    '</div>' +
+  '</div>';
+  if (String(state.confirmDeleteId) === String(f.id)) {
+    row += '<div class="delete-confirm"><span>Delete "' + esc(f.n) + '" from your foods?</span>' +
+      '<button class="no-btn" data-action="cancelDeleteFood">Cancel</button>' +
+      '<button class="yes-btn" data-action="confirmDeleteFood" data-id="' + esc(f.id) + '">Delete</button></div>';
+  }
+  return row;
 }
 
 function render() {
@@ -486,8 +582,8 @@ function render() {
           '<button class="goals-btn" data-action="toggleGoals">Goals</button></div>';
   if (state.showGoals) {
     html += '<div class="goals-edit">' +
-      '<label>Protein goal (g)<input id="goal-protein" data-field="goals.protein" type="number" inputmode="decimal" placeholder="e.g. 160" value="' + esc(state.goals.protein) + '"></label>' +
-      '<label>Calorie goal<input id="goal-calories" data-field="goals.calories" type="number" inputmode="decimal" placeholder="e.g. 2200" value="' + esc(state.goals.calories) + '"></label>' +
+      '<label>Protein goal (g)<input id="goal-protein" data-field="goals.protein" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" placeholder="e.g. 160" value="' + esc(state.goals.protein) + '"></label>' +
+      '<label>Calorie goal<input id="goal-calories" data-field="goals.calories" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" placeholder="e.g. 2200" value="' + esc(state.goals.calories) + '"></label>' +
       '</div>';
   }
   html += '<div class="cal-row"><span class="lbl">Calories</span><span class="val">' + Math.round(totals.c) +
@@ -506,7 +602,7 @@ function render() {
     html += '<div class="burned-box"><span class="lbl">Calories burned (\u00bd credit)</span>' +
       '<div class="stepper">' +
       '<button data-action="adjustBurned" data-value="-50">\u2212</button>' +
-      '<input id="burned-input" data-field="burned" type="number" inputmode="numeric" value="' + burned + '">' +
+      '<input id="burned-input" data-field="burned" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="numeric" value="' + burned + '">' +
       '<button data-action="adjustBurned" data-value="50">+</button>' +
       '</div></div>';
   }
@@ -542,16 +638,16 @@ function render() {
     html += '<div class="sub">Tell me the nutrition for a known amount \u2014 I\'ll work out the rate, then ask how much you actually had.</div>';
     html += '<input id="custom-name" type="text" data-field="customDraft.n" placeholder="Description (e.g. Restaurant burger)" value="' + esc(d.n) + '">';
     html += '<div class="sublabel">Nutrition is for this much:</div>';
-    html += '<div class="amt-row"><input id="custom-amount" type="number" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
+    html += '<div class="amt-row"><input id="custom-amount" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
     html += '<select id="custom-unit" data-field="customDraft.unit">' +
       ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(d.unit===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving(s)':u)+'</option>'; }).join('') +
       '</select></div>';
     html += '<div class="sublabel">Nutrition for that amount:</div>';
     html += '<div class="grid2">' +
-      '<label>Calories<input id="custom-cal" type="number" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
-      '<label>Protein (g)<input id="custom-protein" type="number" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
-      '<label>Carbs (g)<input id="custom-carbs" type="number" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
-      '<label>Fat (g)<input id="custom-fat" type="number" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
+      '<label>Calories<input id="custom-cal" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
+      '<label>Protein (g)<input id="custom-protein" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
+      '<label>Carbs (g)<input id="custom-carbs" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
+      '<label>Fat (g)<input id="custom-fat" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
       '</div>';
     html += '<div class="checkbox-row"><input id="custom-save" type="checkbox" data-field="saveCustomForFuture" ' + (state.saveCustomForFuture?'checked':'') + '> Save to my foods so I can search for it next time</div>';
     html += '<button class="big-btn" data-action="defineCustomFood" ' + (!d.n.trim() ? 'disabled' : '') + '>Next: how much did you have?</button>';
@@ -573,7 +669,37 @@ function render() {
         });
         html += '</div>';
       }
+    } else {
+      var together = frequentlyTogether(entries);
+      if (together.length > 0) {
+        html += '<div class="recent-wrap"><div class="recent-lbl">Often Logged Together</div><div class="recent-row">';
+        together.forEach(function(f) {
+          html += '<button class="recent-chip" data-action="pickFood" data-id="' + esc(f.id) + '">' +
+            '<div class="n">' + esc(f.n) + '</div>' +
+            '<div class="m">' + round1(f.c) + 'cal/' + f.u + '</div>' +
+            '</button>';
+        });
+        html += '</div></div>';
+      }
     }
+    html += '</div>';
+  }
+
+  if (state.editingFood) {
+    var ed = state.editDraft;
+    html += '<div class="edit-food-panel">';
+    html += '<div class="ttl">Edit Food</div>';
+    html += '<input id="edit-name" type="text" data-field="editDraft.n" value="' + esc(ed.n) + '" placeholder="Name">';
+    html += '<div class="grid2">' +
+      '<label>Unit<select id="edit-unit" data-field="editDraft.u">' +
+        ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(ed.u===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving':u)+'</option>'; }).join('') +
+      '</select></label>' +
+      '<label>Calories / unit<input id="edit-cal" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.c" value="' + esc(ed.c) + '"></label>' +
+      '<label>Protein / unit (g)<input id="edit-protein" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.p" value="' + esc(ed.p) + '"></label>' +
+      '<label>Carbs / unit (g)<input id="edit-carbs" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.cb" value="' + esc(ed.cb) + '"></label>' +
+      '<label>Fat / unit (g)<input id="edit-fat" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.f" value="' + esc(ed.f) + '"></label>' +
+      '</div>';
+    html += '<div class="btn-row"><button class="cancel-btn" data-action="cancelEditFood">Cancel</button><button class="save-btn" data-action="saveEditFood">Save</button></div>';
     html += '</div>';
   }
 
@@ -584,21 +710,18 @@ function render() {
       var list = state.customFoods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
       html += '<div><button class="cat-hdr custom ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="My Custom Foods"><span>My Custom Foods</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
       if (isOpen) {
-        list.forEach(function(f) {
-          html += '<button class="browse-item" data-action="pickFoodAndSearch" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
-        });
+        list.forEach(function(f) { html += browseRow(f); });
       }
       html += '</div>';
     }
     CATEGORY_ORDER.forEach(function(cat) {
-      var list = FOODS_BY_CATEGORY[cat];
+      var ids = IDS_BY_CATEGORY[cat];
+      var list = ids.map(getFoodById).filter(Boolean).sort(function(a,b){ return a.n.localeCompare(b.n); });
       if (!list.length) return;
       var isOpen = !!state.openCats[cat];
       html += '<div><button class="cat-hdr ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="' + esc(cat) + '"><span>' + esc(cat) + '</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
       if (isOpen) {
-        list.forEach(function(f) {
-          html += '<button class="browse-item" data-action="pickFoodAndSearch" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
-        });
+        list.forEach(function(f) { html += browseRow(f); });
       }
       html += '</div>';
     });
@@ -611,7 +734,7 @@ function render() {
     html += '<div class="hdr2"><span class="name">' + esc(picked.n) + '</span><button data-action="closePicked">\u00d7</button></div>';
     html += '<div class="qty-stepper">';
     html += '<button data-action="adjustQty" data-value="-' + UNIT_STEP[picked.u] + '">\u2212</button>';
-    html += '<input id="qty-input" type="number" inputmode="decimal" data-field="qty" value="' + state.qty + '">';
+    html += '<input id="qty-input" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="qty" value="' + state.qty + '">';
     html += '<span class="unit">' + UNIT_LABEL[picked.u] + '</span>';
     html += '<button data-action="adjustQty" data-value="' + UNIT_STEP[picked.u] + '">+</button>';
     html += '</div>';
@@ -631,7 +754,8 @@ function render() {
     html += '</div>';
   }
 
-  html += '<div class="entries-hdr"><span class="lbl">' + (state.view==='plan'?'Planned':'Logged') + ' (' + entries.length + ')</span><span class="status">\u2713 Saved</span></div>';
+  html += '<div class="entries-hdr"><span class="lbl">' + (state.view==='plan'?'Planned':'Logged') + ' (' + entries.length + ')</span>' +
+    (entries.length > 0 ? '<button class="clear-day-btn" data-action="clearDay">Clear day</button>' : '<span class="status">\u2713 Saved</span>') + '</div>';
   if (entries.length === 0) {
     html += '<div class="empty-state">' + (state.view==='plan' ? 'Nothing planned yet \u2014 search above to add what you\'ll eat.' : 'Nothing logged yet \u2014 search above to add a food.') + '</div>';
   } else {
@@ -682,6 +806,7 @@ function confirmAdd() {
   var p = state.picked;
   var entry = { id: Date.now() + Math.random(), n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, qty: state.qty };
   var entries = getEntries();
+  if (state.view === 'log') recordPair(entry, entries);
   entries.push(entry);
   setEntries(entries);
 
@@ -699,6 +824,14 @@ function confirmAdd() {
 function removeEntry(id) {
   var entries = getEntries().filter(function(e){ return String(e.id) !== String(id); });
   setEntries(entries);
+  render();
+}
+
+function clearDay() {
+  var label = state.view === 'plan' ? 'plan' : 'log';
+  var ok = window.confirm('Clear all ' + getEntries().length + ' item(s) from ' + label + ' for ' + prettyDate(currentDate()) + '? This can\'t be undone.');
+  if (!ok) return;
+  setEntries([]);
   render();
 }
 
@@ -727,6 +860,69 @@ function defineCustomFood() {
   render();
 }
 
+function startEditFood(id) {
+  var food = isCustomId(id) ? state.customFoods.find(function(f){ return String(f.id) === String(id); }) : getFoodById(id);
+  if (!food) return;
+  state.editingFood = food;
+  state.editDraft = { n: food.n, u: food.u, p: String(food.p), c: String(food.c), cb: String(food.cb), f: String(food.f) };
+  state.confirmDeleteId = null;
+  render();
+}
+
+function cancelEditFood() {
+  state.editingFood = null;
+  state.editDraft = null;
+  render();
+}
+
+function saveEditFood() {
+  if (!state.editingFood) return;
+  var id = state.editingFood.id;
+  var d = state.editDraft;
+  var updated = {
+    n: d.n.trim() || state.editingFood.n,
+    u: d.u,
+    p: Number(d.p) || 0,
+    c: Number(d.c) || 0,
+    cb: Number(d.cb) || 0,
+    f: Number(d.f) || 0,
+  };
+  if (isCustomId(id)) {
+    state.customFoods = state.customFoods.map(function(f) {
+      return String(f.id) === String(id) ? Object.assign({}, f, updated) : f;
+    });
+    lsSet('customFoods', state.customFoods);
+  } else {
+    state.foodEdits[String(id)] = updated;
+    lsSet('foodEdits', state.foodEdits);
+  }
+  state.editingFood = null;
+  state.editDraft = null;
+  render();
+}
+
+function startDeleteFood(id) {
+  state.confirmDeleteId = id;
+  render();
+}
+
+function cancelDeleteFood() {
+  state.confirmDeleteId = null;
+  render();
+}
+
+function confirmDeleteFood(id) {
+  if (isCustomId(id)) {
+    state.customFoods = state.customFoods.filter(function(f){ return String(f.id) !== String(id); });
+    lsSet('customFoods', state.customFoods);
+  } else {
+    state.deletedFoodIds = state.deletedFoodIds.concat([id]);
+    lsSet('deletedFoodIds', state.deletedFoodIds);
+  }
+  state.confirmDeleteId = null;
+  render();
+}
+
 function copyPlanToLog() {
   var planEntries = getEntries();
   var logEntries = lsGet('log:' + state.planDate, []);
@@ -747,6 +943,14 @@ function setPath(obj, path, value) {
 // ---------------------------------------------------------------------------
 // Event delegation — attached once
 // ---------------------------------------------------------------------------
+// Auto-select existing text when a field gets focus, so typing replaces it
+// instead of appending to it — covers every text/number input, present and future.
+root.addEventListener('focusin', function(e) {
+  if (e.target.tagName === 'INPUT' && (e.target.type === 'number' || e.target.type === 'text')) {
+    e.target.select();
+  }
+});
+
 root.addEventListener('click', function(e) {
   var btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -779,6 +983,7 @@ root.addEventListener('click', function(e) {
   else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); render(); }
   else if (action === 'confirmAdd') { confirmAdd(); }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
+  else if (action === 'clearDay') { clearDay(); }
   else if (action === 'defineCustomFood') { defineCustomFood(); }
   else if (action === 'toggleCat') {
     var cat = btn.dataset.cat;
@@ -786,6 +991,12 @@ root.addEventListener('click', function(e) {
     render();
   }
   else if (action === 'scanBarcode') { scanAndLookup(); }
+  else if (action === 'editFood') { startEditFood(btn.dataset.id); }
+  else if (action === 'cancelEditFood') { cancelEditFood(); }
+  else if (action === 'saveEditFood') { saveEditFood(); }
+  else if (action === 'deleteFood') { startDeleteFood(btn.dataset.id); }
+  else if (action === 'cancelDeleteFood') { cancelDeleteFood(); }
+  else if (action === 'confirmDeleteFood') { confirmDeleteFood(btn.dataset.id); }
 });
 
 root.addEventListener('input', function(e) {
@@ -804,6 +1015,10 @@ root.addEventListener('input', function(e) {
     setPath(state, field, val);
     render();
   }
+  else if (field.indexOf('editDraft.') === 0) {
+    setPath(state, field, val);
+    render();
+  }
 });
 
 root.addEventListener('change', function(e) {
@@ -811,6 +1026,7 @@ root.addEventListener('change', function(e) {
   if (!field) return;
   if (field === 'saveCustomForFuture') { state.saveCustomForFuture = e.target.checked; render(); }
   else if (field === 'customDraft.unit') { state.customDraft.unit = e.target.value; render(); }
+  else if (field === 'editDraft.u') { state.editDraft.u = e.target.value; render(); }
 });
 
 // ---------------------------------------------------------------------------
