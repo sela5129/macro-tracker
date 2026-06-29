@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Macro Log</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Macro Log">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAFyUlEQVR4nO3d/0vVVxzH8XPTW1AYXKJ0mbBYBovVWou1IGPGlCUrWq0um5ZfR39AsL8m7/VrchEVxRquwtUarOYaVGtIrrVC6NoPumag3dL9EIywz+vTvXavHu95Pn6Se85H3+ST4/14LxYIhUIG8LJssQeAvYgDEnFAIg5IxAGJOCARByTigEQckHL9l+Px0YWZA4slP79QLXFyQCIOSMQBiTggEQek19ytvMrnyS3sl9LtJycHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHpJT/grFVioqKhoZ+Tn7/qVPftrW1z/vLdXS07dtXmuTm69d/27//83l/LRu4dXLU19fO+9qNG98uLf0kXZMsCW7FsWXLu7t3fzy/a+vrawOBQHrnsZxbcRhj6urmc3isXLkyHA6nfRjLORdHRcVnBQX5qV517NiXq1fnZWIemzkXR25ubnX1iVSvepMnK0uXc3EYY44frwwGg8nvLynZs3nz5szNYy0X41i7du2BAyncZLp5bBg34zCpfL83bNhQXl6W0WGs5WgcO3d+uG3b1mR21tZW5+TkZHoeOzkah0nunnbFihWVlV8twDB2cjeOw4cPhUIh/z1Hjnzx2j1ZLPvjSCQSno8ncyr4nC5Pnz59o7GWguyPo7e3Ty3V1JxYtkz+C+za9dHWre95Lk1PTw8MnE/DcHbL/jj6+vofPXrkuVRUVFRW9qm60OeOpqurZ3x8PA3D2S3740gkEq2t8mV6VUBBQX5FRYW6KhKJpmEy62V/HMaY5uaWROKZ59LevSWbNr3z6uPV1SeCQe83u1y79svNm7fSOZ+tnIjj4cP4uXPfeS4FAoHa2po5DwaDwaqqr9Vna2x04tgwjsRhjGlsjKilcPjoqlWrXn7k4MED69at89wcj4+dPXs2zcPZypU4rl69duvW755LeXl54fDRlx9paKhTn6elpVX9hMo+rsRhfH8c1NXV/P/x9u3v79jxgee2ROJZS0tb2gezlkNxdHf3TExMeC4VFxeXlOx58XF9vTw2+vv7x8bGMjGbnRyKY2pqqr29Q62+uKdds2bNoUMH1Z7Tp+UTl6zkUBzGmGi0eWZmxnOpvLyssLCwqqpy+fLlnhtu3Lg5NPRrJqezjltxPHjw4Pz5C55LOTk5DQ11NTXyHYQ+9zvZyq04jO/T0pMnv1m//i3PpfHx8Z6e3owNZSnn4rh06fKdOyOeSz5v6mltbZ+ens7YUJZyLg5jTDTalNL+58+fNzW1ZGYWq7kYRyzWOTk5mfz+gYHvR0dHMzePtVyMY3JyMhbrTH6/Oy+mzOFiHMaYSCQ6OzubzM7h4eErV37K9Dx2cjSOkZE/L1/+MZmdkUhThmexl6NxmOR+3fn48b+dnV0LMIyd3I3jwoWL9+/f998Ti8WePHmyMPNYyN04ZmZmotFmnw2zs7Mu/0wxLsdhjDlzpmNqakqtDg7+cPfuXws5j22cjmNi4p+urm616uCLKXM4HYfRT0vv3fv74sXBBR7GNkv7rwm+udu3/8jPL1zsKSzl+skBH8QBiTggEQck4oBEHJCIAxJxQAr4/82reHzu2+P4ldGSltI3lJMDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5Iuale8Op/ho5sxckBiTggEQck4oBEHJACoVBosWeApTg5IBEHJOKARByQiAMScUAiDkjEAek/xksnGyzYORgAAAAASUVORK5CYII=">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #FAFAF6; color: #111; font-family: -apple-system, system-ui, sans-serif; }
+  body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0; }
+  input, select, button { font-family: inherit; }
+  input:focus, select:focus { outline: none; border-color: #111 !important; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 16px 12px 40px; }
+  .hdr { background:#111; color:#FAFAF6; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .hdr .title { font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:-0.5px; }
+  .banner { background:#F4D9D2; border:4px solid #111; border-top:0; padding:8px 12px; font-size:12px; }
+  .toggle2 { display:grid; grid-template-columns:1fr 1fr; border:4px solid #111; border-top:4px solid #111; border-bottom:0; }
+  .toggle2 button, .toggle3 button, .toggle4 button { padding:10px 0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; background:#fff; color:#111; border:0; cursor:pointer; }
+  .toggle2 button.active, .toggle3 button.active, .toggle4 button.active { background:#111; color:#fff; }
+  .toggle2 button:nth-child(2) { border-left:2px solid #111; }
+  .datenav { background:#fff; border:4px solid #111; border-top:0; border-bottom:0; display:flex; align-items:center; justify-content:space-between; padding:8px; }
+  .datenav button { background:none; border:0; font-size:20px; padding:8px 14px; cursor:pointer; color:#111; }
+  .datenav button:disabled { opacity:0.25; }
+  .datenav .lbl { font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.02em; }
+  .panel { background:#fff; border:4px solid #111; border-top:0; padding:12px 16px 16px; }
+  .panel-hdr { display:flex; align-items:baseline; justify-content:space-between; border-bottom:8px solid #111; padding-bottom:4px; }
+  .panel-hdr .ttl { font-size:26px; font-weight:900; text-transform:uppercase; line-height:1.1; }
+  .panel-hdr .goals-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:rgba(0,0,0,0.5); text-decoration:underline; background:none; border:0; cursor:pointer; }
+  .goals-edit { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.15); }
+  .goals-edit label { font-size:11px; font-family:'SF Mono', Menlo, monospace; color:rgba(0,0,0,0.6); }
+  .goals-edit input { width:100%; border:2px solid rgba(0,0,0,0.2); padding:4px 8px; margin-top:2px; font-size:14px; }
+  .cal-row { display:flex; align-items:baseline; justify-content:space-between; border-bottom:4px solid #111; padding:8px 0; }
+  .cal-row .lbl { font-size:17px; font-weight:800; text-transform:uppercase; }
+  .cal-row .val { font-size:34px; font-weight:900; font-family:'SF Mono', Menlo, monospace; }
+  .cal-row .val .goal { font-size:13px; color:rgba(0,0,0,0.4); }
+  .macro-row { display:flex; align-items:baseline; justify-content:space-between; border-top:1px solid rgba(0,0,0,0.15); padding:8px 0; }
+  .macro-row .lbl { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; }
+  .macro-row .val { font-size:15px; font-family:'SF Mono', Menlo, monospace; }
+  .pbar-wrap { margin-top:-6px; padding-bottom:6px; }
+  .pbar-bg { height:6px; background:rgba(0,0,0,0.1); border-radius:3px; overflow:hidden; }
+  .pbar-fill { height:100%; border-radius:3px; }
+  .pbar-note { font-size:10px; font-family:'SF Mono', Menlo, monospace; color:rgba(0,0,0,0.4); margin-top:2px; }
+  .burned-box { margin-top:12px; display:flex; align-items:center; justify-content:space-between; background:#F1EFE6; padding:8px 12px; border-radius:6px; }
+  .burned-box .lbl { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.7); }
+  .stepper { display:flex; align-items:center; gap:8px; }
+  .stepper button { width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:#111; color:#fff; border:0; border-radius:6px; font-size:16px; cursor:pointer; }
+  .stepper input { width:56px; text-align:center; font-family:'SF Mono',Menlo,monospace; font-size:15px; background:#fff; border:1px solid rgba(0,0,0,0.2); border-radius:4px; padding:4px; }
+  .copy-btn { margin-top:12px; width:100%; background:#F1EFE6; border:1px solid rgba(0,0,0,0.2); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:10px; cursor:pointer; }
+  .toggle3 { margin-top:16px; display:grid; grid-template-columns:1fr 1fr 1fr; border:2px solid #111; }
+  .toggle3 button { display:flex; align-items:center; justify-content:center; gap:5px; font-size:12px; }
+  .toggle3 button:not(:first-child) { border-left:2px solid #111; }
+  .toggle4 { margin-top:16px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; border:2px solid #111; }
+  .toggle4 button { display:flex; align-items:center; justify-content:center; gap:4px; font-size:11px; padding:10px 2px; }
+  .toggle4 button:not(:first-child) { border-left:2px solid #111; }
+  #scanner-overlay { position:fixed; inset:0; background:#000; z-index:100; display:flex; align-items:center; justify-content:center; }
+  .scanner-box { position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  #scanner-video { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+  .scanner-frame { position:relative; width:80%; max-width:320px; height:140px; border:3px solid #fff; border-radius:12px; box-shadow:0 0 0 2000px rgba(0,0,0,0.45); }
+  .scanner-status { position:relative; margin-top:24px; color:#fff; font-size:14px; text-align:center; padding:0 24px; z-index:1; }
+  #scanner-cancel { position:absolute; bottom:40px; z-index:1; background:#fff; color:#111; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; font-size:13px; padding:10px 24px; border:0; border-radius:24px; cursor:pointer; }
+  .lookup-spinner { display:inline-block; }
+  .recent-wrap { margin-top:16px; }
+  .recent-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:6px; padding:0 4px; }
+  .recent-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+  .recent-chip { flex-shrink:0; background:#fff; border:2px solid #111; padding:8px 12px; text-align:left; cursor:pointer; }
+  .recent-chip .n { font-size:13px; font-weight:600; white-space:nowrap; }
+  .recent-chip .m { font-size:10px; font-family:'SF Mono', Menlo, monospace; color:rgba(0,0,0,0.5); white-space:nowrap; }
+  .search-box { margin-top:8px; position:relative; }
+  .search-box .row { display:flex; align-items:center; background:#fff; border:2px solid #111; padding:8px 12px; gap:8px; }
+  .search-box input { width:100%; border:0; background:none; font-size:15px; }
+  .search-box .clear { background:none; border:0; color:rgba(0,0,0,0.4); font-size:18px; cursor:pointer; }
+  .results { position:relative; margin-top:4px; background:#fff; border:2px solid #111; max-height:288px; overflow-y:auto; }
+  .result-item, .browse-item { width:100%; text-align:left; padding:10px 12px; border-bottom:1px solid rgba(0,0,0,0.1); background:none; border:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:14px; }
+  .result-item .cal, .browse-item .cal { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-left:8px; flex-shrink:0; }
+  .browse-wrap { margin-top:8px; background:#fff; border:2px solid #111; max-height:448px; overflow-y:auto; }
+  .cat-hdr { width:100%; display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#F1EFE6; border:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; cursor:pointer; }
+  .cat-hdr.custom { background:#EFE8D8; }
+  .cat-hdr .right { display:flex; align-items:center; gap:8px; font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.4); }
+  .cat-hdr .chev { display:inline-block; transition:transform 0.15s; }
+  .cat-hdr.open .chev { transform:rotate(180deg); }
+  .browse-item { padding-left:20px; border-top:1px solid rgba(0,0,0,0.08); }
+  .custom-form { margin-top:8px; background:#fff; border:2px solid #111; padding:16px; }
+  .custom-form .ttl { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:4px; }
+  .custom-form .sub { font-size:11px; color:rgba(0,0,0,0.5); margin-bottom:12px; }
+  .custom-form input[type=text], .custom-form input[type=number] { border:2px solid rgba(0,0,0,0.2); padding:8px 10px; font-size:14px; width:100%; margin-bottom:8px; }
+  .custom-form .amt-row { display:flex; gap:8px; margin-bottom:12px; }
+  .custom-form .amt-row input { width:96px; margin-bottom:0; }
+  .custom-form select { border:2px solid rgba(0,0,0,0.2); padding:8px 10px; font-size:14px; background:#fff; }
+  .custom-form .sublabel { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:4px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .grid2 label { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.6); }
+  .grid2 input { margin-top:2px; margin-bottom:0; }
+  .checkbox-row { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:12px; color:rgba(0,0,0,0.7); }
+  .big-btn { width:100%; background:#111; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:11px; border:0; font-size:14px; cursor:pointer; }
+  .big-btn:disabled { opacity:0.3; }
+  .qty-card { margin-top:12px; background:#fff; border:2px solid #111; padding:16px; }
+  .qty-card .hdr2 { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .qty-card .hdr2 .name { font-weight:700; font-size:15px; }
+  .qty-card .hdr2 button { background:none; border:0; font-size:20px; color:rgba(0,0,0,0.4); cursor:pointer; }
+  .qty-stepper { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px; }
+  .qty-stepper button { width:40px; height:40px; border-radius:50%; background:#111; color:#fff; border:0; font-size:18px; cursor:pointer; }
+  .qty-stepper input { width:96px; text-align:center; font-size:22px; font-weight:700; font-family:'SF Mono',Menlo,monospace; border:0; border-bottom:2px solid #111; background:none; padding:4px 0; }
+  .qty-stepper .unit { font-size:14px; font-weight:600; color:rgba(0,0,0,0.6); width:64px; }
+  .quick-stats { display:flex; justify-content:center; gap:16px; font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-bottom:12px; }
+  .preview-box { background:#F1EFE6; border:1px solid rgba(0,0,0,0.15); padding:10px 12px; margin-bottom:12px; }
+  .preview-box .ttl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:6px; }
+  .preview-box .row { display:flex; align-items:baseline; justify-content:space-between; }
+  .preview-box .row .l { font-size:12px; font-weight:600; text-transform:uppercase; }
+  .preview-box .row .v { font-size:16px; font-weight:700; font-family:'SF Mono',Menlo,monospace; }
+  .preview-box .row .v .g { color:rgba(0,0,0,0.4); font-size:11px; font-weight:400; }
+  .preview-box .note { font-size:11px; font-family:'SF Mono',Menlo,monospace; margin-top:4px; }
+  .preview-box .sub-row { display:flex; justify-content:space-between; font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-top:6px; }
+  .entries-hdr { display:flex; align-items:center; justify-content:space-between; margin:20px 4px 8px; }
+  .entries-hdr .lbl { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.6); }
+  .entries-hdr .status { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:#2F6B45; }
+  .empty-state { text-align:center; color:rgba(0,0,0,0.3); font-size:14px; padding:32px 16px; border:2px dashed rgba(0,0,0,0.15); }
+  .entry { background:#fff; border:1px solid rgba(0,0,0,0.2); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .entry .name { font-size:14px; font-weight:600; }
+  .entry .meta { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); }
+  .entry button { background:none; border:0; font-size:18px; color:rgba(0,0,0,0.4); padding:6px; cursor:pointer; }
+  .footer-note { text-align:center; font-size:11px; color:rgba(0,0,0,0.3); margin-top:24px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#111; color:#fff; font-size:14px; padding:10px 18px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+
+// ---------------------------------------------------------------------------
+// Food database — extracted directly from the spreadsheet formulas.
+// n=name, u=unit (g/oz/ml/serving), p=protein, c=calories, cb=carbs, f=fat — all PER 1 UNIT
+// ---------------------------------------------------------------------------
+var RAW_FOODS = [
+{n:'5 minute rice',u:'g',p:0.087,c:3.6957,cb:0.8261,f:0},
+{n:'93/7 beef',u:'oz',p:5.75,c:42.5,cb:0,f:2.0},
+{n:'Almond milk',u:'ml',p:0.0042,c:0.125,cb:0.0042,f:0.0104},
+{n:'Applewood bacon Pork loin',u:'g',p:0.1786,c:1.4286,cb:0,f:0.0625},
+{n:'Archer mini jerky',u:'serving',p:4,c:45,cb:0,f:3},
+{n:'Avacado',u:'g',p:0.02,c:1.6,cb:0.085,f:0.14},
+{n:'Baby carrots',u:'g',p:0.006,c:0.3529,cb:0.0824,f:0},
+{n:'Baby Rays BBQ sauce',u:'g',p:0,c:1.9444,cb:0.5,f:0},
+{n:'Bacon',u:'g',p:0.3529,c:4.7059,cb:0,f:0.4118},
+{n:'Banana',u:'serving',p:1.3,c:105,cb:27,f:0},
+{n:'Banza pasta',u:'g',p:0.1964,c:3.3929,cb:0.625,f:0.0536},
+{n:'Barilla protein spaghetti',u:'g',p:0.1786,c:3.3929,cb:0.6786,f:0.0179},
+{n:'Berry blend',u:'g',p:0.0071,c:0.5714,cb:0.1357,f:0.0071},
+{n:'Birds Eye Alfredo',u:'serving',p:16,c:295,cb:0,f:0},
+{n:'Black beans',u:'g',p:0.0538,c:0.8462,cb:0.1538,f:0},
+{n:'Black berries',u:'g',p:0.014,c:0.43,cb:0.096,f:0},
+{n:'Black olives',u:'g',p:0,c:1.0714,cb:0.0714,f:0.1071},
+{n:'Blueberries',u:'g',p:0.007,c:0.57,cb:0.14,f:0},
+{n:'Bonza elbow pasta',u:'g',p:0.1964,c:3.3929,cb:0.625,f:0.0536},
+{n:'Broccoli slaw',u:'g',p:0.0235,c:0.4118,cb:0.0706,f:0},
+{n:'Brownie batter',u:'serving',p:17,c:140,cb:14,f:2.5},
+{n:'Butter',u:'g',p:0,c:4.2857,cb:0,f:0.4286},
+{n:'C&C oatmeal',u:'serving',p:4,c:130,cb:25,f:2.5},
+{n:'C4 Protein',u:'serving',p:25,c:130,cb:2,f:2},
+{n:'Cantaloupe',u:'g',p:0.008,c:0.53,cb:0.13,f:0},
+{n:'Carmel rice cake',u:'serving',p:0,c:50,cb:11,f:0},
+{n:'Catalina Crunch',u:'g',p:0.3056,c:3.0556,cb:0.3889,f:0.1389},
+{n:'Catalina Crunch Dark Choc.',u:'g',p:0.3056,c:4.1667,cb:0.4167,f:0.1389},
+{n:'Catalina Crunch Trail mix',u:'g',p:0.303,c:4.2424,cb:0.3939,f:0.2121},
+{n:'Cheerio granola',u:'g',p:0.0877,c:4.0351,cb:0.7544,f:0.0877},
+{n:'Cheerios',u:'g',p:0.1282,c:3.5897,cb:0.7436,f:0.0641},
+{n:'Cheese sauce',u:'g',p:0,c:1.3235,cb:0.0882,f:0.0882},
+{n:'Cheese slice',u:'serving',p:5,c:70,cb:0,f:7},
+{n:'Chia seed',u:'g',p:0.1562,c:4.6875,cb:0.4062,f:0.3125},
+{n:'Chia seed (overnight oats mix)',u:'g',p:0.1333,c:5.3333,cb:0.3929,f:0.2857},
+{n:'Chicken breast',u:'oz',p:6.25,c:27.5,cb:0,f:1},
+{n:'Chicken melts',u:'serving',p:10,c:180,cb:0,f:0},
+{n:'Chicken tortellini',u:'serving',p:11,c:260,cb:37,f:7},
+{n:'Chipotle chicken bowl',u:'serving',p:48.0,c:665.0,cb:91.0,f:14.0},
+{n:'Chipotle ranch',u:'g',p:0,c:3.3333,cb:0.0667,f:0.3333},
+{n:'Chobani',u:'g',p:0.0765,c:0.4118,cb:0.0353,f:0},
+{n:'Chobani zero vanilla',u:'g',p:0.0765,c:0.4118,cb:0.0353,f:0},
+{n:'Choc pb lean body',u:'serving',p:25,c:407,cb:0,f:0},
+{n:'Chocolate almond granola',u:'g',p:0.1071,c:4.2857,cb:0.7143,f:0.125},
+{n:'Chocolate oatmeal',u:'serving',p:4,c:130,cb:25,f:3.5},
+{n:'Chocolate rice cake',u:'serving',p:1,c:60,cb:12,f:1},
+{n:'Chocolate wafer',u:'g',p:0.0667,c:5.3333,cb:0.6,f:0.3},
+{n:'Coconut rollers',u:'g',p:0,c:21.4286,cb:3.0,f:1.0},
+{n:'Cookie dough',u:'serving',p:15,c:160,cb:19,f:3.5},
+{n:'Corn in can',u:'g',p:0.016,c:0.56,cb:0.096,f:0},
+{n:'Corn on the cob',u:'serving',p:4.5,c:155,cb:32,f:3.4},
+{n:'Cosmic crisp',u:'g',p:0,c:0.7143,cb:0.1714,f:0.0036},
+{n:'Costco chicken bowl',u:'serving',p:23,c:240,cb:15,f:9},
+{n:'Costco Edamame',u:'serving',p:12,c:140,cb:11,f:5},
+{n:'Costco pineapple',u:'g',p:0,c:0.5714,cb:0.1429,f:0},
+{n:'Costco roasted Edamame',u:'g',p:0.4333,c:4.3333,cb:0.3,f:0.1667},
+{n:'Cucumbet',u:'g',p:0.0065,c:0.1493,cb:0,f:0},
+{n:'Cutie',u:'serving',p:0.5,c:45,cb:11,f:0},
+{n:'Edamame',u:'g',p:0.0946,c:1.2162,cb:0.1351,f:0.0338},
+{n:'Egg',u:'serving',p:6,c:70,cb:0,f:5},
+{n:'Egg noodles',u:'serving',p:8,c:210,cb:0,f:0},
+{n:'Egg white',u:'g',p:0.1087,c:0.5435,cb:0,f:0},
+{n:'English muffin',u:'serving',p:5,c:150,cb:28,f:1},
+{n:'Fairlife',u:'serving',p:30,c:150,cb:4,f:2.5},
+{n:'Famous Fries',u:'g',p:0.0238,c:1.6667,cb:0.25,f:0.0595},
+{n:'Farm house potato soup',u:'g',p:0.0286,c:1.0204,cb:0.0816,f:0.0653},
+{n:'Favorite ham',u:'g',p:0.1754,c:1.2281,cb:0.0351,f:0.0439},
+{n:'Fit crunch',u:'serving',p:16,c:190,cb:0,f:0},
+{n:'Frog fuel',u:'serving',p:8,c:72,cb:10,f:0},
+{n:'Frozen corn',u:'g',p:0.0353,c:1.0588,cb:0.2235,f:0},
+{n:'Frozen Costco strawberries',u:'g',p:0.0036,c:1.0714,cb:0.0929,f:0},
+{n:'Frozen peas',u:'g',p:0.0471,c:0.8235,cb:0.1412,f:0},
+{n:'Fuji apple',u:'g',p:0.002,c:0.52,cb:0.138,f:0},
+{n:'Gala Apple',u:'serving',p:0,c:80,cb:15,f:0},
+{n:'Garden salad',u:'g',p:0.0118,c:0.1765,cb:0.0353,f:0},
+{n:'Grape nut',u:'g',p:0.1034,c:3.4483,cb:0.8103,f:0.0172},
+{n:'Grapes',u:'g',p:0.0065,c:0.6739,cb:0.1739,f:0},
+{n:'Hillshire farm ham',u:'g',p:0.1607,c:1.25,cb:0.0179,f:0.0446},
+{n:'Hillshire Farm Turkey',u:'g',p:0.1786,c:1.25,cb:0.0893,f:0.0268},
+{n:'Honey',u:'g',p:0,c:2.8571,cb:0.8095,f:0},
+{n:'Hot dogs',u:'serving',p:6,c:170,cb:4,f:15},
+{n:'Idahoan potatoes',u:'g',p:0.0143,c:0.7857,cb:0,f:0},
+{n:'Instant potatoes',u:'serving',p:3,c:110,cb:19,f:2.5},
+{n:'Instant potatoes cup',u:'serving',p:3,c:170,cb:29,f:4.5},
+{n:'Jicama',u:'g',p:0.007,c:0.38,cb:0.09,f:0},
+{n:'Just bare chicken',u:'g',p:0.1882,c:1.7647,cb:0.1176,f:0.0588},
+{n:'Kiwi',u:'g',p:1.0,c:45.0,cb:11.0,f:0},
+{n:'Kraft string cheese',u:'serving',p:7,c:80,cb:0,f:0},
+{n:'Kroger broccoli',u:'g',p:0.0235,c:0.4118,cb:0.0706,f:0},
+{n:'Kroger grilled chick strips',u:'g',p:0.2262,c:1.1905,cb:0,f:0},
+{n:'Kroger ham',u:'g',p:0.1786,c:1.25,cb:0.0714,f:0.0357},
+{n:'Kroger vegetable medley',u:'g',p:0.0235,c:0.3529,cb:0.0706,f:0},
+{n:'La favorita chips',u:'g',p:0.0357,c:2.5,cb:0.4286,f:0.0893},
+{n:"LAND O' FROST HAM",u:'g',p:0.16,c:1.2,cb:0.02,f:0.04},
+{n:'Light sour cream',u:'g',p:0.0667,c:1.1667,cb:0.0333,f:0.0833},
+{n:'Lightly salted rice cake',u:'serving',p:0.4,c:35,cb:7,f:0},
+{n:'Mikel Bridges chipotle bowl',u:'serving',p:70.0,c:670.0,cb:0,f:0},
+{n:'Mixed nuts',u:'g',p:0.1786,c:6.4286,cb:0.25,f:0.5357},
+{n:'MM buff. Chicken',u:'g',p:0.1864,c:1.0169,cb:0,f:0},
+{n:'MM ham',u:'g',p:0.1731,c:0.9615,cb:0,f:0},
+{n:'MM mixed veg',u:'g',p:0.0215,c:0.0602,cb:0.1325,f:0},
+{n:'MM rising crust pizza',u:'g',p:0.0979,c:2.4476,cb:0.2937,f:0.0909},
+{n:'MM Turkey',u:'g',p:0.1935,c:0.9677,cb:0.0161,f:0.0081},
+{n:'My popcorn',u:'g',p:0.1,c:3.25,cb:0.725,f:0.0375},
+{n:'My protein coffe',u:'serving',p:11,c:130,cb:1,f:2.5},
+{n:'Nanitas Green Chili',u:'g',p:0.0175,c:0.8772,cb:0.0526,f:0.0351},
+{n:'Nature bakery oats & honey',u:'g',p:0.2,c:4.1538,cb:0.6308,f:0.1077},
+{n:'New granola',u:'g',p:0.1333,c:5.0,cb:0.6,f:0.1667},
+{n:'Oatmeal',u:'serving',p:4,c:120,cb:24,f:2},
+{n:'Oats',u:'g',p:0.125,c:3.75,cb:0.675,f:0.0625},
+{n:'Oikos vanilla',u:'g',p:0.1,c:0.5882,cb:0.0471,f:0},
+{n:'Oikos vanilla whole',u:'g',p:0.0941,c:0.7059,cb:0.0824,f:0},
+{n:'Old fashioned oats',u:'g',p:0.125,c:3.75,cb:0.675,f:0.0625},
+{n:'Olive Garden Caesar dressing',u:'g',p:0,c:2.5806,cb:0.0645,f:0},
+{n:'Olive oil mayo',u:'g',p:0,c:4.0,cb:0,f:0.4},
+{n:'Oscar Mayer ham',u:'g',p:0.1786,c:1.0714,cb:0,f:0},
+{n:'Oscar me turkey',u:'g',p:0.1607,c:0.8929,cb:0.0357,f:0.0179},
+{n:'Panera Broc cheddar cup',u:'serving',p:11,c:280,cb:20,f:17},
+{n:'Panera soup',u:'g',p:0.0449,c:0.6122,cb:0.0816,f:0.0122},
+{n:'Parmesan cheese',u:'g',p:0.3929,c:4.2857,cb:0,f:0.2857},
+{n:'PB fit Walmart',u:'g',p:0.5,c:4.1667,cb:0.3333,f:0.125},
+{n:'Pb granola',u:'g',p:0.0909,c:4.1818,cb:0.6,f:0.1818},
+{n:'Peanut butter',u:'g',p:0.2188,c:5.9375,cb:0.1875,f:0.5},
+{n:'Pepperidge farm',u:'serving',p:3,c:100,cb:0,f:0},
+{n:'Pineapple',u:'g',p:0.005,c:0.5,cb:0.13,f:0},
+{n:'Pizza',u:'serving',p:28,c:640,cb:0,f:0},
+{n:'Pizza roll',u:'g',p:0.8333,c:33.3333,cb:4.8333,f:1.3333},
+{n:'Plain Greek yogurt',u:'g',p:0.1059,c:0.5882,cb:0.0412,f:0},
+{n:'Pork chop',u:'g',p:0.2124,c:1.5929,cb:0,f:0},
+{n:'Premier protein',u:'serving',p:30,c:160,cb:5,f:3},
+{n:'Premier protein vanilla',u:'serving',p:30,c:150,cb:3,f:2},
+{n:'Protein cheeseitz',u:'g',p:0.4,c:4.6667,cb:0.2667,f:0.2},
+{n:'Protein granola',u:'g',p:0.194,c:4.6269,cb:0.6119,f:0.1642},
+{n:'Protein Oatmeal',u:'serving',p:12,c:220,cb:38,f:3},
+{n:'Protein shake',u:'serving',p:24,c:120,cb:0,f:0},
+{n:'Quest chili lime',u:'serving',p:20,c:140,cb:0,f:0},
+{n:'Quest nacho',u:'serving',p:18,c:150,cb:5,f:0},
+{n:'Quest peanut butter cup',u:'g',p:5.5,c:100,cb:0,f:0},
+{n:'Ramen',u:'serving',p:8,c:370,cb:54,f:14},
+{n:'Ranch salad topper',u:'g',p:0.1071,c:4.2857,cb:0.5714,f:0.2143},
+{n:'Ranchero Queso',u:'g',p:0.2143,c:2.8571,cb:0,f:0.2143},
+{n:'Raos Pizza Sauce',u:'g',p:0.0167,c:0.75,cb:0.05,f:0.05},
+{n:'Raspberries',u:'g',p:0.0122,c:0.5285,cb:0.122,f:0.0065},
+{n:'Real good chicken strips',u:'g',p:0.1875,c:1.0714,cb:0.0357,f:0.0446},
+{n:'Reduced mozzarella',u:'g',p:0.25,c:2.8571,cb:0.0714,f:0.2143},
+{n:"Reese's protein",u:'serving',p:25,c:140,cb:4,f:2.5},
+{n:'Regular sour cream',u:'g',p:0.0333,c:2.0,cb:0,f:0},
+{n:'Reign/Celsius',u:'serving',p:0,c:10,cb:0,f:0},
+{n:'Rump roast',u:'g',p:0.27,c:1.99,cb:0,f:0.09},
+{n:'Russet potato',u:'g',p:0.02,c:0.81,cb:0.2,f:0},
+{n:'Safeway 90/10',u:'g',p:0.1964,c:1.6964,cb:0,f:0},
+{n:"Sam's creamer potatoes",u:'g',p:0.0182,c:0.7273,cb:0.1727,f:0},
+{n:"Sam's golden potatoes",u:'g',p:0.0203,c:0.7432,cb:0.1757,f:0},
+{n:"Sam's ribs",u:'g',p:0.1357,c:2.1429,cb:0.1214,f:0.1214},
+{n:"Sam's rotisserie chicken",u:'oz',p:6.3333,c:43.3333,cb:0,f:2.0},
+{n:"Sam's salad",u:'serving',p:5.25,c:280,cb:19.25,f:21},
+{n:'Sandwich bros',u:'serving',p:11,c:150,cb:16,f:4.5},
+{n:'Shredded Mex cheese',u:'g',p:0.2143,c:3.9286,cb:0.0357,f:0.3214},
+{n:'Southwest salad',u:'g',p:5.25,c:280,cb:19.25,f:0},
+{n:'Strawberries',u:'g',p:0.0071,c:0.3214,cb:0.0786,f:0},
+{n:'Sub kit',u:'serving',p:16,c:160,cb:4,f:8},
+{n:'Subway buff chick bowl',u:'serving',p:36,c:380,cb:0,f:0},
+{n:'Supreme digiorno',u:'serving',p:28,c:680,cb:78,f:28},
+{n:'Target sirloin',u:'oz',p:6.0,c:37.5,cb:0,f:1.75},
+{n:'Thin sargento',u:'serving',p:3,c:45,cb:0,f:3.5},
+{n:'Tillamook jerky',u:'g',p:0.5,c:2.5,cb:0,f:0.0536},
+{n:'Toasty Cheeze-it',u:'g',p:0.1,c:5.0,cb:0.5667,f:0.2667},
+{n:'Top round London broil',u:'g',p:0.2235,c:1.4,cb:0,f:0.0471},
+{n:'Top round thin steak',u:'oz',p:6.25,c:47.5,cb:0,f:0},
+{n:'Tostitos queso',u:'g',p:0.0147,c:1.1765,cb:0.1471,f:0.0735},
+{n:'Tostitos salsa',u:'g',p:0,c:0.303,cb:0.0606,f:0},
+{n:'Tuna',u:'serving',p:15,c:70,cb:0,f:0},
+{n:'Tuna in the can',u:'serving',p:20,c:90,cb:0,f:0},
+{n:'Turky pepperoni',u:'g',p:0.3,c:2.3333,cb:0,f:0.1333},
+{n:'Twizzler',u:'g',p:0,c:36.6667,cb:8.6667,f:0},
+{n:'Two good yogurt',u:'g',p:0.0765,c:0.5294,cb:0.0235,f:0.0118},
+{n:'Tyson grilled and ready',u:'g',p:0.25,c:1.3095,cb:0,f:0},
+{n:'Ultra thin Black Forest Ham',u:'g',p:0.1607,c:1.0714,cb:0.0179,f:0.0446},
+{n:"Uncle Ben's rice",u:'g',p:0.0667,c:3.5556,cb:0.7778,f:0},
+{n:'Varilla Protein thin spaghetti',u:'g',p:0.1786,c:3.3929,cb:0.6786,f:0.0179},
+{n:'Veggie Straw small bag',u:'serving',p:0,c:130,cb:17,f:7},
+{n:'Veggie straws',u:'g',p:0,c:5.3571,cb:0.6071,f:0.25},
+{n:'Watermelon',u:'g',p:0.0059,c:0.3026,cb:0.0757,f:0.0013},
+{n:'Yogurt',u:'serving',p:15,c:90,cb:7,f:0},
+{n:'Yoplait protein',u:'g',p:0.0949,c:0.6329,cb:0.0316,f:0.0095},
+{n:'Zesty Italian fat free',u:'g',p:0,c:0.4688,cb:0.0938,f:0},
+];
+var FOODS = RAW_FOODS.map(function(f, i) { return Object.assign({}, f, { id: i }); });
+
+var CATEGORY = {'Avacado':'Fruits','Banana':'Fruits','Black berries':'Fruits','Blueberries':'Fruits','Cantaloupe':'Fruits','Costco pineapple':'Fruits','Cosmic crisp':'Fruits','Cutie':'Fruits','Frozen Costco strawberries':'Fruits','Fuji apple':'Fruits','Gala Apple':'Fruits','Grapes':'Fruits','Kiwi':'Fruits','Pineapple':'Fruits','Raspberries':'Fruits','Strawberries':'Fruits','Watermelon':'Fruits','Berry blend':'Fruits','Baby carrots':'Vegetables','Black beans':'Vegetables','Black olives':'Vegetables','Broccoli slaw':'Vegetables','Corn in can':'Vegetables','Corn on the cob':'Vegetables','Costco Edamame':'Vegetables','Costco roasted Edamame':'Vegetables','Cucumbet':'Vegetables','Edamame':'Vegetables','Frozen corn':'Vegetables','Frozen peas':'Vegetables','Garden salad':'Vegetables','Idahoan potatoes':'Vegetables','Instant potatoes':'Vegetables','Instant potatoes cup':'Vegetables','Jicama':'Vegetables','Kroger broccoli':'Vegetables','Kroger vegetable medley':'Vegetables','MM mixed veg':'Vegetables','Russet potato':'Vegetables',"Sam's creamer potatoes":'Vegetables',"Sam's golden potatoes":'Vegetables','93/7 beef':'Meat, Poultry & Seafood','Applewood bacon Pork loin':'Meat, Poultry & Seafood','Bacon':'Meat, Poultry & Seafood','Chicken breast':'Meat, Poultry & Seafood','Chicken melts':'Meat, Poultry & Seafood','Favorite ham':'Meat, Poultry & Seafood','Hillshire Farm Turkey':'Meat, Poultry & Seafood','Hillshire farm ham':'Meat, Poultry & Seafood','Hot dogs':'Meat, Poultry & Seafood','Just bare chicken':'Meat, Poultry & Seafood','Kroger grilled chick strips':'Meat, Poultry & Seafood','Kroger ham':'Meat, Poultry & Seafood',"LAND O' FROST HAM":'Meat, Poultry & Seafood','MM Turkey':'Meat, Poultry & Seafood','MM buff. Chicken':'Meat, Poultry & Seafood','MM ham':'Meat, Poultry & Seafood','Oscar Mayer ham':'Meat, Poultry & Seafood','Oscar me turkey':'Meat, Poultry & Seafood','Pork chop':'Meat, Poultry & Seafood','Real good chicken strips':'Meat, Poultry & Seafood','Rump roast':'Meat, Poultry & Seafood','Safeway 90/10':'Meat, Poultry & Seafood',"Sam's ribs":'Meat, Poultry & Seafood',"Sam's rotisserie chicken":'Meat, Poultry & Seafood','Target sirloin':'Meat, Poultry & Seafood','Top round London broil':'Meat, Poultry & Seafood','Top round thin steak':'Meat, Poultry & Seafood','Turky pepperoni':'Meat, Poultry & Seafood','Tyson grilled and ready':'Meat, Poultry & Seafood','Ultra thin Black Forest Ham':'Meat, Poultry & Seafood','Archer mini jerky':'Meat, Poultry & Seafood','Tillamook jerky':'Meat, Poultry & Seafood','Tuna':'Meat, Poultry & Seafood','Tuna in the can':'Meat, Poultry & Seafood','Egg':'Eggs & Dairy','Egg white':'Eggs & Dairy','Chobani':'Eggs & Dairy','Chobani zero vanilla':'Eggs & Dairy','Fairlife':'Eggs & Dairy','Light sour cream':'Eggs & Dairy','Regular sour cream':'Eggs & Dairy','Oikos vanilla':'Eggs & Dairy','Oikos vanilla whole':'Eggs & Dairy','Plain Greek yogurt':'Eggs & Dairy','Two good yogurt':'Eggs & Dairy','Yogurt':'Eggs & Dairy','Yoplait protein':'Eggs & Dairy','Reduced mozzarella':'Eggs & Dairy','Shredded Mex cheese':'Eggs & Dairy','Parmesan cheese':'Eggs & Dairy','Cheese slice':'Eggs & Dairy','Kraft string cheese':'Eggs & Dairy','Thin sargento':'Eggs & Dairy','Butter':'Eggs & Dairy','5 minute rice':'Grains, Bread & Cereal','Banza pasta':'Grains, Bread & Cereal','Barilla protein spaghetti':'Grains, Bread & Cereal','Bonza elbow pasta':'Grains, Bread & Cereal','Egg noodles':'Grains, Bread & Cereal','English muffin':'Grains, Bread & Cereal','Oatmeal':'Grains, Bread & Cereal','Oats':'Grains, Bread & Cereal','Old fashioned oats':'Grains, Bread & Cereal',"Uncle Ben's rice":'Grains, Bread & Cereal','Varilla Protein thin spaghetti':'Grains, Bread & Cereal','Cheerios':'Grains, Bread & Cereal','Grape nut':'Grains, Bread & Cereal','Protein Oatmeal':'Grains, Bread & Cereal','C&C oatmeal':'Grains, Bread & Cereal','Chocolate oatmeal':'Grains, Bread & Cereal','C4 Protein':'Protein Shakes & Bars','Choc pb lean body':'Protein Shakes & Bars','Fit crunch':'Protein Shakes & Bars','Frog fuel':'Protein Shakes & Bars','My protein coffe':'Protein Shakes & Bars','PB fit Walmart':'Protein Shakes & Bars','Premier protein':'Protein Shakes & Bars','Premier protein vanilla':'Protein Shakes & Bars','Protein shake':'Protein Shakes & Bars',"Reese's protein":'Protein Shakes & Bars','Quest chili lime':'Protein Shakes & Bars','Quest nacho':'Protein Shakes & Bars','Quest peanut butter cup':'Protein Shakes & Bars','Protein cheeseitz':'Protein Shakes & Bars','Protein granola':'Protein Shakes & Bars','Chia seed':'Nuts, Seeds & Spreads','Chia seed (overnight oats mix)':'Nuts, Seeds & Spreads','Mixed nuts':'Nuts, Seeds & Spreads','Peanut butter':'Nuts, Seeds & Spreads','Baby Rays BBQ sauce':'Sauces & Condiments','Chipotle ranch':'Sauces & Condiments','Olive Garden Caesar dressing':'Sauces & Condiments','Ranch salad topper':'Sauces & Condiments','Ranchero Queso':'Sauces & Condiments','Raos Pizza Sauce':'Sauces & Condiments','Tostitos queso':'Sauces & Condiments','Tostitos salsa':'Sauces & Condiments','Zesty Italian fat free':'Sauces & Condiments','Cheese sauce':'Sauces & Condiments','Honey':'Sauces & Condiments','Olive oil mayo':'Sauces & Condiments','Nanitas Green Chili':'Sauces & Condiments','Catalina Crunch':'Snacks','Catalina Crunch Dark Choc.':'Snacks','Catalina Crunch Trail mix':'Snacks','Cheerio granola':'Snacks','Chocolate almond granola':'Snacks','Famous Fries':'Snacks','La favorita chips':'Snacks','My popcorn':'Snacks','New granola':'Snacks','Nature bakery oats & honey':'Snacks','Pb granola':'Snacks','Toasty Cheeze-it':'Snacks','Veggie Straw small bag':'Snacks','Veggie straws':'Snacks','Coconut rollers':'Snacks','Carmel rice cake':'Snacks','Chocolate rice cake':'Snacks','Lightly salted rice cake':'Snacks','Pepperidge farm':'Snacks','Brownie batter':'Sweets & Desserts','Chocolate wafer':'Sweets & Desserts','Cookie dough':'Sweets & Desserts','Twizzler':'Sweets & Desserts','Birds Eye Alfredo':'Prepared Meals & Fast Food','Chicken tortellini':'Prepared Meals & Fast Food','Chipotle chicken bowl':'Prepared Meals & Fast Food','Costco chicken bowl':'Prepared Meals & Fast Food','Farm house potato soup':'Prepared Meals & Fast Food','Mikel Bridges chipotle bowl':'Prepared Meals & Fast Food','MM rising crust pizza':'Prepared Meals & Fast Food','Panera Broc cheddar cup':'Prepared Meals & Fast Food','Panera soup':'Prepared Meals & Fast Food','Pizza':'Prepared Meals & Fast Food','Pizza roll':'Prepared Meals & Fast Food','Ramen':'Prepared Meals & Fast Food',"Sam's salad":'Prepared Meals & Fast Food','Sandwich bros':'Prepared Meals & Fast Food','Southwest salad':'Prepared Meals & Fast Food','Sub kit':'Prepared Meals & Fast Food','Subway buff chick bowl':'Prepared Meals & Fast Food','Supreme digiorno':'Prepared Meals & Fast Food','Almond milk':'Drinks','Reign/Celsius':'Drinks'};
+
+var CATEGORY_ORDER = ['Fruits','Vegetables','Meat, Poultry & Seafood','Eggs & Dairy','Grains, Bread & Cereal','Protein Shakes & Bars','Nuts, Seeds & Spreads','Sauces & Condiments','Snacks','Sweets & Desserts','Prepared Meals & Fast Food','Drinks','Other'];
+
+var FOODS_BY_CATEGORY = {};
+CATEGORY_ORDER.forEach(function(cat) {
+  FOODS_BY_CATEGORY[cat] = FOODS.filter(function(f){ return (CATEGORY[f.n] || 'Other') === cat; })
+    .sort(function(a,b){ return a.n.localeCompare(b.n); });
+});
+
+var UNIT_LABEL = { g: 'g', oz: 'oz', ml: 'ml', serving: 'serving' };
+var UNIT_STEP = { g: 5, oz: 1, ml: 10, serving: 1 };
+var UNIT_DEFAULT = { g: 100, oz: 4, ml: 250, serving: 1 };
+
+// ---------------------------------------------------------------------------
+// Date helpers
+// ---------------------------------------------------------------------------
+function pad(n) { return String(n).padStart(2, '0'); }
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function shiftDate(s, delta) {
+  var parts = s.split('-').map(Number);
+  var dt = new Date(parts[0], parts[1] - 1, parts[2]);
+  dt.setDate(dt.getDate() + delta);
+  return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate());
+}
+function prettyDate(s) {
+  var parts = s.split('-').map(Number);
+  var dt = new Date(parts[0], parts[1] - 1, parts[2]);
+  var today = todayStr();
+  if (s === today) return 'Today';
+  var yest = new Date(); yest.setDate(yest.getDate() - 1);
+  var yestStr = yest.getFullYear() + '-' + pad(yest.getMonth() + 1) + '-' + pad(yest.getDate());
+  if (s === yestStr) return 'Yesterday';
+  return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function round1(n) { return Math.round((n || 0) * 10) / 10; }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ---------------------------------------------------------------------------
+// localStorage helpers (synchronous, real browser storage — this is the whole
+// point of running it as a standalone Safari/home-screen app instead of inside
+// a Claude artifact)
+// ---------------------------------------------------------------------------
+function lsGet(key, fallback) {
+  try {
+    var raw = localStorage.getItem(key);
+    return raw == null ? fallback : JSON.parse(raw);
+  } catch (e) { return fallback; }
+}
+function lsSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch (e) { return false; }
+}
+
+// ---------------------------------------------------------------------------
+// App state
+// ---------------------------------------------------------------------------
+var state = {
+  view: 'log',
+  logDate: todayStr(),
+  planDate: shiftDate(todayStr(), 1),
+  burned: 0,
+  customFoods: lsGet('customFoods', []),
+  recentFoods: lsGet('recentFoods', []),
+  goals: lsGet('goals', { protein: '', calories: '' }),
+  query: '',
+  mode: 'search',
+  openCats: {},
+  picked: null,
+  qty: 0,
+  showCustomForm: false,
+  customDraft: { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' },
+  saveCustomForFuture: true,
+  showGoals: false,
+  toast: '',
+};
+state.openCats[CATEGORY_ORDER[0]] = true;
+
+function currentDate() { return state.view === 'log' ? state.logDate : state.planDate; }
+function entriesKey() { return (state.view === 'log' ? 'log:' : 'plan:') + currentDate(); }
+function getEntries() { return lsGet(entriesKey(), []); }
+function setEntries(next) { lsSet(entriesKey(), next); }
+function getBurned() { return lsGet('burned:' + state.logDate, 0); }
+function setBurned(v) { lsSet('burned:' + state.logDate, v); }
+
+function allFoods() { return state.customFoods.concat(FOODS); }
+
+function computeTotals(entries) {
+  var t = entries.reduce(function(acc, e) {
+    acc.p += e.p * e.qty; acc.c += e.c * e.qty; acc.cb += e.cb * e.qty; acc.f += e.f * e.qty;
+    return acc;
+  }, { p: 0, c: 0, cb: 0, f: 0 });
+  if (state.view === 'log') t.c = Math.max(0, t.c - getBurned() * 0.5);
+  return t;
+}
+
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+var root = document.getElementById('root');
+
+function macroRow(label, value, unit, color) {
+  return '<div class="macro-row"><span class="lbl">' + label + '</span>' +
+    '<span class="val" style="color:' + color + '">' + round1(value) + unit + '</span></div>';
+}
+
+function render() {
+  var active = document.activeElement;
+  var activeId = active && active.id;
+  var selStart, selEnd;
+  if (active && typeof active.selectionStart === 'number') {
+    selStart = active.selectionStart; selEnd = active.selectionEnd;
+  }
+
+  var entries = getEntries();
+  var totals = computeTotals(entries);
+  var burned = getBurned();
+  var proteinGoal = Number(state.goals.protein) || 0;
+  var calorieGoal = Number(state.goals.calories) || 0;
+  var date = currentDate();
+
+  var projected = totals;
+  if (state.picked && state.qty) {
+    projected = {
+      p: totals.p + state.picked.p * state.qty,
+      c: totals.c + state.picked.c * state.qty,
+      cb: totals.cb + state.picked.cb * state.qty,
+      f: totals.f + state.picked.f * state.qty,
+    };
+  }
+
+  var html = '';
+
+  html += '<div class="wrap">';
+  html += '<div class="hdr"><span class="title">Macro Log</span><span>\uD83D\uDD25</span></div>';
+
+  html += '<div class="toggle2">';
+  html += '<button data-action="setView" data-value="log" class="' + (state.view==='log'?'active':'') + '">Log</button>';
+  html += '<button data-action="setView" data-value="plan" class="' + (state.view==='plan'?'active':'') + '">Plan Ahead</button>';
+  html += '</div>';
+
+  html += '<div class="datenav">';
+  html += '<button data-action="shiftDate" data-value="-1">\u2039</button>';
+  html += '<span class="lbl">' + (state.view==='plan' ? '<span style="color:rgba(0,0,0,0.4);margin-right:4px;">Plan:</span>' : '') + prettyDate(date) + '</span>';
+  html += '<button data-action="shiftDate" data-value="1" ' + (state.view==='log' && date >= todayStr() ? 'disabled' : '') + '>\u203a</button>';
+  html += '</div>';
+
+  // totals panel
+  html += '<div class="panel">';
+  html += '<div class="panel-hdr"><span class="ttl">' + (state.view==='plan' ? 'Planned Totals' : 'Daily Totals') + '</span>' +
+          '<button class="goals-btn" data-action="toggleGoals">Goals</button></div>';
+  if (state.showGoals) {
+    html += '<div class="goals-edit">' +
+      '<label>Protein goal (g)<input id="goal-protein" data-field="goals.protein" type="number" inputmode="decimal" placeholder="e.g. 160" value="' + esc(state.goals.protein) + '"></label>' +
+      '<label>Calorie goal<input id="goal-calories" data-field="goals.calories" type="number" inputmode="decimal" placeholder="e.g. 2200" value="' + esc(state.goals.calories) + '"></label>' +
+      '</div>';
+  }
+  html += '<div class="cal-row"><span class="lbl">Calories</span><span class="val">' + Math.round(totals.c) +
+          (calorieGoal > 0 ? '<span class="goal"> /' + calorieGoal + '</span>' : '') + '</span></div>';
+  html += macroRow('Protein', totals.p, 'g', '#2F6B45');
+  if (proteinGoal > 0) {
+    var pct = Math.min(100, (totals.p / proteinGoal) * 100);
+    var hit = totals.p >= proteinGoal;
+    html += '<div class="pbar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:' + pct + '%;background:' + (hit?'#2F6B45':'#7FA98C') + '"></div></div>' +
+      '<div class="pbar-note">' + (hit ? ('Goal hit \u2014 ' + round1(totals.p - proteinGoal) + 'g over ' + proteinGoal + 'g') : (round1(proteinGoal - totals.p) + 'g to go to hit ' + proteinGoal + 'g')) + '</div></div>';
+  }
+  html += macroRow('Carbs', totals.cb, 'g', '#B5651D');
+  html += macroRow('Fat', totals.f, 'g', '#9C2B1B');
+
+  if (state.view === 'log') {
+    html += '<div class="burned-box"><span class="lbl">Calories burned (\u00bd credit)</span>' +
+      '<div class="stepper">' +
+      '<button data-action="adjustBurned" data-value="-50">\u2212</button>' +
+      '<input id="burned-input" data-field="burned" type="number" inputmode="numeric" value="' + burned + '">' +
+      '<button data-action="adjustBurned" data-value="50">+</button>' +
+      '</div></div>';
+  }
+  if (state.view === 'plan' && entries.length > 0) {
+    html += '<button class="copy-btn" data-action="copyPlanToLog">Copy this plan into ' + prettyDate(state.planDate) + '\'s log</button>';
+  }
+  html += '</div>';
+
+  // recently logged — quick re-add for snacks/leftovers, same qty as last time
+  if (state.recentFoods.length > 0 && !state.showCustomForm) {
+    html += '<div class="recent-wrap"><div class="recent-lbl">Recently Logged</div><div class="recent-row">';
+    state.recentFoods.forEach(function(r) {
+      html += '<button class="recent-chip" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
+        '<div class="n">' + esc(r.n) + '</div>' +
+        '<div class="m">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</div>' +
+        '</button>';
+    });
+    html += '</div></div>';
+  }
+
+  // mode toggle
+  html += '<div class="toggle4">';
+  html += '<button data-action="setMode" data-value="search" class="' + (state.mode==='search' && !state.showCustomForm ? 'active':'') + '">\uD83D\uDD0D Search</button>';
+  html += '<button data-action="setMode" data-value="browse" class="' + (state.mode==='browse' && !state.showCustomForm ? 'active':'') + '">\u2630 Browse</button>';
+  html += '<button data-action="toggleCustomForm" class="' + (state.showCustomForm ? 'active':'') + '">+ Custom</button>';
+  html += '<button data-action="scanBarcode">\uD83D\uDCF7 Scan</button>';
+  html += '</div>';
+
+  if (state.showCustomForm) {
+    var d = state.customDraft;
+    html += '<div class="custom-form">';
+    html += '<div class="ttl">Add a new food</div>';
+    html += '<div class="sub">Tell me the nutrition for a known amount \u2014 I\'ll work out the rate, then ask how much you actually had.</div>';
+    html += '<input id="custom-name" type="text" data-field="customDraft.n" placeholder="Description (e.g. Restaurant burger)" value="' + esc(d.n) + '">';
+    html += '<div class="sublabel">Nutrition is for this much:</div>';
+    html += '<div class="amt-row"><input id="custom-amount" type="number" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
+    html += '<select id="custom-unit" data-field="customDraft.unit">' +
+      ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(d.unit===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving(s)':u)+'</option>'; }).join('') +
+      '</select></div>';
+    html += '<div class="sublabel">Nutrition for that amount:</div>';
+    html += '<div class="grid2">' +
+      '<label>Calories<input id="custom-cal" type="number" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
+      '<label>Protein (g)<input id="custom-protein" type="number" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
+      '<label>Carbs (g)<input id="custom-carbs" type="number" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
+      '<label>Fat (g)<input id="custom-fat" type="number" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
+      '</div>';
+    html += '<div class="checkbox-row"><input id="custom-save" type="checkbox" data-field="saveCustomForFuture" ' + (state.saveCustomForFuture?'checked':'') + '> Save to my foods so I can search for it next time</div>';
+    html += '<button class="big-btn" data-action="defineCustomFood" ' + (!d.n.trim() ? 'disabled' : '') + '>Next: how much did you have?</button>';
+    html += '</div>';
+  }
+
+  if (state.mode === 'search' && !state.showCustomForm) {
+    html += '<div class="search-box"><div class="row">\uD83D\uDD0D' +
+      '<input id="search-input" type="text" data-field="query" placeholder="Search your foods\u2026" value="' + esc(state.query) + '">' +
+      (state.query ? '<button class="clear" data-action="clearQuery">\u00d7</button>' : '') +
+      '</div>';
+    var q = state.query.trim().toLowerCase();
+    if (q) {
+      var results = allFoods().filter(function(f){ return f.n.toLowerCase().indexOf(q) !== -1; }).slice(0, 8);
+      if (results.length) {
+        html += '<div class="results">';
+        results.forEach(function(f) {
+          html += '<button class="result-item" data-action="pickFood" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
+        });
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+  }
+
+  if (state.mode === 'browse' && !state.showCustomForm) {
+    html += '<div class="browse-wrap">';
+    if (state.customFoods.length > 0) {
+      var isOpen = !!state.openCats['My Custom Foods'];
+      var list = state.customFoods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
+      html += '<div><button class="cat-hdr custom ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="My Custom Foods"><span>My Custom Foods</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
+      if (isOpen) {
+        list.forEach(function(f) {
+          html += '<button class="browse-item" data-action="pickFoodAndSearch" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
+        });
+      }
+      html += '</div>';
+    }
+    CATEGORY_ORDER.forEach(function(cat) {
+      var list = FOODS_BY_CATEGORY[cat];
+      if (!list.length) return;
+      var isOpen = !!state.openCats[cat];
+      html += '<div><button class="cat-hdr ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="' + esc(cat) + '"><span>' + esc(cat) + '</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
+      if (isOpen) {
+        list.forEach(function(f) {
+          html += '<button class="browse-item" data-action="pickFoodAndSearch" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
+        });
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (state.picked) {
+    var picked = state.picked;
+    html += '<div class="qty-card">';
+    html += '<div class="hdr2"><span class="name">' + esc(picked.n) + '</span><button data-action="closePicked">\u00d7</button></div>';
+    html += '<div class="qty-stepper">';
+    html += '<button data-action="adjustQty" data-value="-' + UNIT_STEP[picked.u] + '">\u2212</button>';
+    html += '<input id="qty-input" type="number" inputmode="decimal" data-field="qty" value="' + state.qty + '">';
+    html += '<span class="unit">' + UNIT_LABEL[picked.u] + '</span>';
+    html += '<button data-action="adjustQty" data-value="' + UNIT_STEP[picked.u] + '">+</button>';
+    html += '</div>';
+    html += '<div class="quick-stats"><span>' + round1(picked.p*state.qty) + 'p</span><span>' + round1(picked.c*state.qty) + 'cal</span><span>' + round1(picked.cb*state.qty) + 'c</span><span>' + round1(picked.f*state.qty) + 'f</span></div>';
+
+    html += '<div class="preview-box"><div class="ttl">' + (state.view==='plan' ? "Day\'s plan would become" : 'Day would become') + '</div>';
+    html += '<div class="row"><span class="l">Calories</span><span class="v">' + Math.round(projected.c) + (calorieGoal>0 ? '<span class="g"> /' + calorieGoal + '</span>' : '') + '</span></div>';
+    html += '<div class="row"><span class="l">Protein</span><span class="v">' + round1(projected.p) + 'g' + (proteinGoal>0 ? '<span class="g"> /' + proteinGoal + 'g</span>' : '') + '</span></div>';
+    if (proteinGoal > 0) {
+      var hit2 = projected.p >= proteinGoal;
+      html += '<div class="note" style="color:' + (hit2?'#2F6B45':'#7a5a1e') + '">' + (hit2 ? ('\u2713 hits your protein goal, +' + round1(projected.p - proteinGoal) + 'g over') : ('still ' + round1(proteinGoal - projected.p) + 'g short of your goal')) + '</div>';
+    }
+    html += '<div class="sub-row"><span>' + round1(projected.cb) + 'g carbs</span><span>' + round1(projected.f) + 'g fat</span></div>';
+    html += '</div>';
+
+    html += '<button class="big-btn" data-action="confirmAdd">Add to ' + (state.view==='plan'?'Plan':'Log') + '</button>';
+    html += '</div>';
+  }
+
+  html += '<div class="entries-hdr"><span class="lbl">' + (state.view==='plan'?'Planned':'Logged') + ' (' + entries.length + ')</span><span class="status">\u2713 Saved</span></div>';
+  if (entries.length === 0) {
+    html += '<div class="empty-state">' + (state.view==='plan' ? 'Nothing planned yet \u2014 search above to add what you\'ll eat.' : 'Nothing logged yet \u2014 search above to add a food.') + '</div>';
+  } else {
+    entries.forEach(function(e) {
+      html += '<div class="entry"><div><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div><button data-action="removeEntry" data-id="' + e.id + '">\uD83D\uDDD1</button></div>';
+    });
+  }
+
+  html += '<div class="footer-note">' + FOODS.length + ' foods from your spreadsheet' + (state.customFoods.length ? ' \u00b7 ' + state.customFoods.length + ' custom' : '') + '</div>';
+  html += '</div>';
+  if (state.toast) {
+    html += '<div class="toast">' + esc(state.toast) + '</div>';
+  }
+
+  root.innerHTML = html;
+
+  if (activeId) {
+    var el = document.getElementById(activeId);
+    if (el) {
+      el.focus();
+      if (selStart != null && el.setSelectionRange) {
+        try { el.setSelectionRange(selStart, selEnd); } catch (e) {}
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Actions
+// ---------------------------------------------------------------------------
+function findFood(id) {
+  id = String(id);
+  return allFoods().find(function(f){ return String(f.id) === id; });
+}
+
+function pickFood(food) {
+  state.picked = food;
+  state.qty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1;
+}
+
+function pickRecent(r) {
+  state.picked = r;
+  state.qty = r.qty; // re-use the exact amount logged last time
+}
+
+function confirmAdd() {
+  if (!state.picked || !state.qty || state.qty <= 0) return;
+  var p = state.picked;
+  var entry = { id: Date.now() + Math.random(), n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, qty: state.qty };
+  var entries = getEntries();
+  entries.push(entry);
+  setEntries(entries);
+
+  // bump this food to the front of "recently logged", deduped by name+unit
+  var filtered = state.recentFoods.filter(function(r){ return !(r.n === p.n && r.u === p.u); });
+  var nextRecents = [{ id: 'recent-' + p.n + '-' + p.u, n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, qty: state.qty }].concat(filtered).slice(0, 12);
+  state.recentFoods = nextRecents;
+  lsSet('recentFoods', nextRecents);
+
+  state.picked = null;
+  state.qty = 0;
+  render();
+}
+
+function removeEntry(id) {
+  var entries = getEntries().filter(function(e){ return String(e.id) !== String(id); });
+  setEntries(entries);
+  render();
+}
+
+function defineCustomFood() {
+  var d = state.customDraft;
+  var name = d.n.trim();
+  if (!name) return;
+  var amount = Number(d.amount) || 1;
+  var unit = d.unit;
+  var food = {
+    id: 'custom-' + Date.now(),
+    n: name, u: unit,
+    p: (Number(d.p)||0) / amount, c: (Number(d.c)||0) / amount, cb: (Number(d.cb)||0) / amount, f: (Number(d.f)||0) / amount,
+  };
+  if (state.saveCustomForFuture) {
+    var already = state.customFoods.some(function(cf){ return cf.n.toLowerCase() === name.toLowerCase(); });
+    if (!already) {
+      state.customFoods = state.customFoods.concat([food]);
+      lsSet('customFoods', state.customFoods);
+    }
+  }
+  state.customDraft = { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' };
+  state.showCustomForm = false;
+  pickFood(food);
+  state.qty = amount;
+  render();
+}
+
+function copyPlanToLog() {
+  var planEntries = getEntries();
+  var logEntries = lsGet('log:' + state.planDate, []);
+  var copied = planEntries.map(function(e){ return Object.assign({}, e, { id: Date.now() + Math.random() }); });
+  lsSet('log:' + state.planDate, logEntries.concat(copied));
+  state.toast = 'Added to log for ' + prettyDate(state.planDate);
+  render();
+  setTimeout(function(){ state.toast = ''; render(); }, 2200);
+}
+
+function setPath(obj, path, value) {
+  var parts = path.split('.');
+  var o = obj;
+  for (var i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = value;
+}
+
+// ---------------------------------------------------------------------------
+// Event delegation — attached once
+// ---------------------------------------------------------------------------
+root.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  var action = btn.dataset.action;
+  var value = btn.dataset.value;
+
+  if (action === 'setView') { state.view = value; state.picked = null; state.qty = 0; render(); }
+  else if (action === 'shiftDate') {
+    var delta = Number(value);
+    if (state.view === 'log') state.logDate = shiftDate(state.logDate, delta);
+    else state.planDate = shiftDate(state.planDate, delta);
+    render();
+  }
+  else if (action === 'toggleGoals') { state.showGoals = !state.showGoals; render(); }
+  else if (action === 'adjustBurned') {
+    setBurned(Math.max(0, getBurned() + Number(value)));
+    render();
+  }
+  else if (action === 'copyPlanToLog') { copyPlanToLog(); }
+  else if (action === 'setMode') { state.mode = value; state.showCustomForm = false; render(); }
+  else if (action === 'toggleCustomForm') { state.showCustomForm = !state.showCustomForm; render(); }
+  else if (action === 'clearQuery') { state.query = ''; render(); }
+  else if (action === 'pickFood') { var f = findFood(btn.dataset.id); if (f) { pickFood(f); render(); } }
+  else if (action === 'pickFoodAndSearch') { var f2 = findFood(btn.dataset.id); if (f2) { pickFood(f2); state.mode = 'search'; render(); } }
+  else if (action === 'pickRecent') {
+    var r = state.recentFoods.find(function(x){ return String(x.id) === btn.dataset.id; });
+    if (r) { pickRecent(r); render(); }
+  }
+  else if (action === 'closePicked') { state.picked = null; state.qty = 0; render(); }
+  else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); render(); }
+  else if (action === 'confirmAdd') { confirmAdd(); }
+  else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
+  else if (action === 'defineCustomFood') { defineCustomFood(); }
+  else if (action === 'toggleCat') {
+    var cat = btn.dataset.cat;
+    state.openCats[cat] = !state.openCats[cat];
+    render();
+  }
+  else if (action === 'scanBarcode') { scanAndLookup(); }
+});
+
+root.addEventListener('input', function(e) {
+  var field = e.target.dataset.field;
+  if (!field) return;
+  var val = e.target.value;
+  if (field === 'query') { state.query = val; render(); }
+  else if (field === 'qty') { state.qty = val === '' ? 0 : Number(val); render(); }
+  else if (field === 'burned') { setBurned(Math.max(0, Number(val) || 0)); render(); }
+  else if (field === 'goals.protein' || field === 'goals.calories') {
+    setPath(state, field, val);
+    lsSet('goals', state.goals);
+    render();
+  }
+  else if (field.indexOf('customDraft.') === 0) {
+    setPath(state, field, val);
+    render();
+  }
+});
+
+root.addEventListener('change', function(e) {
+  var field = e.target.dataset.field;
+  if (!field) return;
+  if (field === 'saveCustomForFuture') { state.saveCustomForFuture = e.target.checked; render(); }
+  else if (field === 'customDraft.unit') { state.customDraft.unit = e.target.value; render(); }
+});
+
+// ---------------------------------------------------------------------------
+// Barcode scanning — lazy-loads ZXing from a CDN only when you tap "Scan"
+// (so the rest of the app keeps working offline). Needs HTTPS + camera
+// permission, so this only works once the app is hosted (e.g. GitHub Pages),
+// not from a local file.
+// ---------------------------------------------------------------------------
+var _zxingPromise = null;
+function loadZXing() {
+  if (window.ZXing) return Promise.resolve(window.ZXing);
+  if (_zxingPromise) return _zxingPromise;
+  _zxingPromise = new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
+    s.onload = function() { resolve(window.ZXing); };
+    s.onerror = function() { reject(new Error('Could not load the barcode scanner (check your internet connection)')); };
+    document.head.appendChild(s);
+  });
+  return _zxingPromise;
+}
+
+function openScanner(onResult) {
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    state.toast = 'Barcode scanning needs the app to be hosted over https:// (e.g. GitHub Pages) — it won\u2019t work from a local file.';
+    render();
+    setTimeout(function(){ state.toast=''; render(); }, 4000);
+    return;
+  }
+
+  var overlay = document.createElement('div');
+  overlay.id = 'scanner-overlay';
+  overlay.innerHTML =
+    '<div class="scanner-box">' +
+      '<video id="scanner-video" autoplay playsinline muted></video>' +
+      '<div class="scanner-frame"></div>' +
+      '<div class="scanner-status" id="scanner-status">Loading scanner\u2026</div>' +
+      '<button id="scanner-cancel">Cancel</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  var statusEl = overlay.querySelector('#scanner-status');
+  var codeReader = null;
+  var stopped = false;
+
+  function cleanup() {
+    if (stopped) return;
+    stopped = true;
+    try { if (codeReader) codeReader.reset(); } catch (e) {}
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+  overlay.querySelector('#scanner-cancel').addEventListener('click', cleanup);
+
+  loadZXing().then(function(ZXing) {
+    if (stopped) return;
+    statusEl.textContent = 'Point your camera at the barcode';
+    codeReader = new ZXing.BrowserMultiFormatReader();
+    codeReader.decodeFromConstraints(
+      { video: { facingMode: 'environment' } },
+      'scanner-video',
+      function(result, err) {
+        if (stopped || !result) return;
+        var code = result.getText();
+        cleanup();
+        onResult(code);
+      }
+    ).catch(function(err) {
+      if (!stopped) statusEl.textContent = 'Camera error: ' + (err && err.message ? err.message : 'could not access the camera');
+    });
+  }).catch(function(err) {
+    if (!stopped) statusEl.textContent = err.message;
+  });
+}
+
+function showToast(msg, ms) {
+  state.toast = msg;
+  render();
+  setTimeout(function(){ if (state.toast === msg) { state.toast = ''; render(); } }, ms || 2500);
+}
+
+function lookupBarcode(code) {
+  state.showCustomForm = true;
+  state.customDraft = { n: 'Looking up ' + code + '\u2026', amount: '100', unit: 'g', p: '', c: '', cb: '', f: '' };
+  render();
+
+  fetch('https://world.openfoodfacts.org/api/v2/product/' + encodeURIComponent(code) + '.json?fields=product_name,brands,nutriments,serving_size')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (!data || data.status === 0 || !data.product) {
+        state.customDraft = { n: '', amount: '100', unit: 'g', p: '', c: '', cb: '', f: '' };
+        render();
+        showToast('No product found for ' + code + ' — try manual entry');
+        return;
+      }
+      var prod = data.product;
+      var n = prod.nutriments || {};
+      var name = prod.product_name || ('Item ' + code);
+      if (prod.brands) name = prod.brands.split(',')[0].trim() + ' ' + name;
+      var cal = n['energy-kcal_100g'];
+      var protein = n['proteins_100g'];
+      var carbs = n['carbohydrates_100g'];
+      var fat = n['fat_100g'];
+      state.customDraft = {
+        n: name.trim(),
+        amount: '100',
+        unit: 'g',
+        c: cal != null ? String(Math.round(cal)) : '',
+        p: protein != null ? String(protein) : '',
+        cb: carbs != null ? String(carbs) : '',
+        f: fat != null ? String(fat) : '',
+      };
+      render();
+      if (cal == null && protein == null) {
+        showToast('Found "' + name.trim() + '" but nutrition data was incomplete — fill in what\u2019s missing');
+      }
+    })
+    .catch(function() {
+      state.customDraft = { n: '', amount: '100', unit: 'g', p: '', c: '', cb: '', f: '' };
+      render();
+      showToast('Could not reach the food database — check your connection');
+    });
+}
+
+function scanAndLookup() {
+  openScanner(function(code) {
+    lookupBarcode(code);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
