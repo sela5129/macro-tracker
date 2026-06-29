@@ -143,6 +143,8 @@
   .entry .name { font-size:14px; font-weight:600; }
   .entry .meta { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); }
   .entry button { background:none; border:0; font-size:18px; color:rgba(0,0,0,0.4); padding:6px; cursor:pointer; }
+  .entry-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+  .entry-actions button:active { color:#111; }
   .footer-note { text-align:center; font-size:11px; color:rgba(0,0,0,0.3); margin-top:24px; }
   .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#111; color:#fff; font-size:14px; padding:10px 18px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
   .hidden { display:none !important; }
@@ -760,7 +762,11 @@ function render() {
     html += '<div class="empty-state">' + (state.view==='plan' ? 'Nothing planned yet \u2014 search above to add what you\'ll eat.' : 'Nothing logged yet \u2014 search above to add a food.') + '</div>';
   } else {
     entries.forEach(function(e) {
-      html += '<div class="entry"><div><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div><button data-action="removeEntry" data-id="' + e.id + '">\uD83D\uDDD1</button></div>';
+      html += '<div class="entry"><div><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div>' +
+        '<div class="entry-actions">' +
+          '<button data-action="duplicateEntry" data-id="' + e.id + '" aria-label="Repeat this">\uD83D\uDCCB</button>' +
+          '<button data-action="removeEntry" data-id="' + e.id + '" aria-label="Delete">\uD83D\uDDD1</button>' +
+        '</div></div>';
     });
   }
 
@@ -825,6 +831,25 @@ function removeEntry(id) {
   var entries = getEntries().filter(function(e){ return String(e.id) !== String(id); });
   setEntries(entries);
   render();
+}
+
+function duplicateEntry(id) {
+  var entries = getEntries();
+  var original = entries.find(function(e){ return String(e.id) === String(id); });
+  if (!original) return;
+  var copy = Object.assign({}, original, { id: Date.now() + Math.random() });
+
+  if (state.view === 'log') recordPair(copy, entries);
+  entries.push(copy);
+  setEntries(entries);
+
+  // treat it like a fresh log too — bump to front of recents
+  var filtered = state.recentFoods.filter(function(r){ return !(r.n === original.n && r.u === original.u); });
+  var nextRecents = [{ id: 'recent-' + original.n + '-' + original.u, n: original.n, u: original.u, p: original.p, c: original.c, cb: original.cb, f: original.f, qty: original.qty }].concat(filtered).slice(0, 12);
+  state.recentFoods = nextRecents;
+  lsSet('recentFoods', nextRecents);
+
+  showToast('Repeated "' + original.n + '"');
 }
 
 function clearDay() {
@@ -983,6 +1008,7 @@ root.addEventListener('click', function(e) {
   else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); render(); }
   else if (action === 'confirmAdd') { confirmAdd(); }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
+  else if (action === 'duplicateEntry') { duplicateEntry(btn.dataset.id); }
   else if (action === 'clearDay') { clearDay(); }
   else if (action === 'defineCustomFood') { defineCustomFood(); }
   else if (action === 'toggleCat') {
