@@ -844,6 +844,7 @@ function render() {
   if (activeId) {
     var el = document.getElementById(activeId);
     if (el) {
+      suppressNextFocusSelect = true; // this refocus is programmatic (re-render), not a real user tap
       el.focus();
       if (selStart != null && el.setSelectionRange) {
         try { el.setSelectionRange(selStart, selEnd); } catch (e) {}
@@ -1120,7 +1121,14 @@ function setPath(obj, path, value) {
 // ---------------------------------------------------------------------------
 // Auto-select existing text when a field gets focus, so typing replaces it
 // instead of appending to it — covers every text/number input, present and future.
+// Skipped when the focus event is the app's own programmatic refocus after a
+// re-render (e.g. after each keystroke), so typing multi-digit numbers works.
+var suppressNextFocusSelect = false;
 root.addEventListener('focusin', function(e) {
+  if (suppressNextFocusSelect) {
+    suppressNextFocusSelect = false;
+    return;
+  }
   if (e.target.tagName === 'INPUT' && (e.target.type === 'number' || e.target.type === 'text')) {
     e.target.select();
   }
