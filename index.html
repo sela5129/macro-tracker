@@ -155,6 +155,14 @@
   .entry-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
   .entry-actions button:active { color:#111; }
   .footer-note { text-align:center; font-size:11px; color:rgba(0,0,0,0.3); margin-top:24px; }
+  .sync-wrap { margin-top:10px; text-align:center; }
+  .sync-toggle { background:none; border:0; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.4); cursor:pointer; padding:6px; }
+  .sync-panel { margin-top:8px; background:#fff; border:2px solid #111; padding:14px; text-align:left; }
+  .sync-note { font-size:11px; color:rgba(0,0,0,0.55); margin-bottom:10px; line-height:1.4; }
+  .sync-row { display:flex; gap:8px; margin-bottom:8px; }
+  .sync-btn { flex:1; background:#F1EFE6; border:1px solid rgba(0,0,0,0.2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:9px 6px; cursor:pointer; }
+  .sync-btn.primary { background:#111; color:#fff; border-color:#111; }
+  #import-box, #export-box { width:100%; height:90px; font-family:'SF Mono',Menlo,monospace; font-size:11px; border:2px solid rgba(0,0,0,0.2); padding:8px; margin-bottom:8px; resize:vertical; }
   .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#111; color:#fff; font-size:14px; padding:10px 18px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
   .hidden { display:none !important; }
 </style>
@@ -445,6 +453,9 @@ var state = {
   confirmDeleteId: null,    // food id pending delete confirmation
   showCopyDayPanel: false,
   copyDayTarget: { date: '', view: 'log' },
+  showSync: false,
+  exportText: null,
+  importText: null,
 };
 state.openCats[CATEGORY_ORDER[0]] = true;
 
@@ -800,6 +811,29 @@ function render() {
   }
 
   html += '<div class="footer-note">' + FOODS.length + ' foods from your spreadsheet' + (state.customFoods.length ? ' \u00b7 ' + state.customFoods.length + ' custom' : '') + '</div>';
+
+  html += '<div class="sync-wrap">';
+  html += '<button class="sync-toggle" data-action="toggleSync">' + (state.showSync ? '\u2212' : '+') + ' Sync &amp; Updates</button>';
+  if (state.showSync) {
+    html += '<div class="sync-panel">';
+    html += '<div class="sync-note">This app keeps separate data in Safari vs. the Home Screen icon. Use Export/Import to carry your log between them or onto another device.</div>';
+    html += '<div class="sync-row">';
+    html += '<button class="sync-btn" data-action="exportData">Export My Data</button>';
+    html += '<button class="sync-btn" data-action="showImport">Import Data</button>';
+    html += '</div>';
+    if (state.importText !== null) {
+      html += '<textarea id="import-box" data-field="importText" placeholder="Paste exported data here">' + esc(state.importText) + '</textarea>';
+      html += '<div class="sync-row"><button class="sync-btn" data-action="cancelImport">Cancel</button><button class="sync-btn primary" data-action="runImport">Apply Import</button></div>';
+    }
+    if (state.exportText !== null) {
+      html += '<textarea id="export-box" readonly>' + esc(state.exportText) + '</textarea>';
+      html += '<div class="sync-note">Copy this text (tap in the box, select all, copy), then paste it into Import on the other app.</div>';
+    }
+    html += '<div class="sync-row"><button class="sync-btn" data-action="checkForUpdates">Check for App Updates</button></div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
   html += '</div>';
   if (state.toast) {
     html += '<div class="toast">' + esc(state.toast) + '</div>';
@@ -910,6 +944,70 @@ function performCopyDay() {
   lsSet(targetKey, existing.concat(copied));
   state.showCopyDayPanel = false;
   showToast('Copied ' + copied.length + ' item(s) to ' + (target.view === 'plan' ? 'plan' : 'log') + ' for ' + prettyDate(target.date));
+}
+
+function toggleSync() {
+  state.showSync = !state.showSync;
+  state.exportText = null;
+  state.importText = null;
+  render();
+}
+
+function exportAllData() {
+  var dump = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    dump[key] = localStorage.getItem(key);
+  }
+  state.exportText = JSON.stringify(dump);
+  state.importText = null;
+  render();
+}
+
+function showImportBox() {
+  state.importText = '';
+  state.exportText = null;
+  render();
+}
+
+function cancelImport() {
+  state.importText = null;
+  render();
+}
+
+function runImport() {
+  var text = (state.importText || '').trim();
+  if (!text) return;
+  var parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) { showToast('That doesn\u2019t look like valid exported data \u2014 check you copied the whole thing'); return; }
+  if (!parsed || typeof parsed !== 'object') { showToast('That doesn\u2019t look like valid exported data'); return; }
+  var ok = window.confirm('Import this data? It will be merged into what\u2019s already on this device, overwriting any matching items (same food, same day).');
+  if (!ok) return;
+  Object.keys(parsed).forEach(function(key) {
+    try { localStorage.setItem(key, parsed[key]); } catch (e) {}
+  });
+  // refresh in-memory state from the newly-imported storage
+  state.customFoods = lsGet('customFoods', []);
+  state.recentFoods = lsGet('recentFoods', []);
+  state.foodEdits = lsGet('foodEdits', {});
+  state.deletedFoodIds = lsGet('deletedFoodIds', []);
+  state.pairCounts = lsGet('pairCounts', {});
+  state.goals = lsGet('goals', { protein: '', calories: '' });
+  state.importText = null;
+  showToast('Import complete');
+}
+
+function checkForUpdates() {
+  showToast('Checking for the latest version\u2026');
+  fetch(location.href.split('#')[0].split('?')[0] + '?cb=' + Date.now(), { cache: 'no-store' })
+    .then(function() {
+      showToast('Reloading with the latest version\u2026');
+      setTimeout(function() { location.reload(); }, 600);
+    })
+    .catch(function() {
+      showToast('Could not check for updates \u2014 check your connection');
+    });
 }
 
 function defineCustomFood() {
@@ -1065,6 +1163,12 @@ root.addEventListener('click', function(e) {
   else if (action === 'openCopyDay') { openCopyDay(); }
   else if (action === 'cancelCopyDay') { cancelCopyDay(); }
   else if (action === 'performCopyDay') { performCopyDay(); }
+  else if (action === 'toggleSync') { toggleSync(); }
+  else if (action === 'exportData') { exportAllData(); }
+  else if (action === 'showImport') { showImportBox(); }
+  else if (action === 'cancelImport') { cancelImport(); }
+  else if (action === 'runImport') { runImport(); }
+  else if (action === 'checkForUpdates') { checkForUpdates(); }
   else if (action === 'defineCustomFood') { defineCustomFood(); }
   else if (action === 'toggleCat') {
     var cat = btn.dataset.cat;
@@ -1102,6 +1206,10 @@ root.addEventListener('input', function(e) {
   }
   else if (field === 'copyDayTarget.date') {
     state.copyDayTarget.date = val;
+    render();
+  }
+  else if (field === 'importText') {
+    state.importText = val;
     render();
   }
 });
