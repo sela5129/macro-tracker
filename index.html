@@ -125,7 +125,7 @@
   .qty-stepper button { width:40px; height:40px; border-radius:50%; background:#111; color:#fff; border:0; font-size:18px; cursor:pointer; }
   .qty-stepper input { width:96px; text-align:center; font-size:22px; font-weight:700; font-family:'SF Mono',Menlo,monospace; border:0; border-bottom:2px solid #111; background:none; padding:4px 0; }
   .qty-stepper .unit { font-size:14px; font-weight:600; color:rgba(0,0,0,0.6); width:64px; }
-  .quick-stats { display:flex; justify-content:center; gap:16px; font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-bottom:12px; }
+  .quick-stats { display:flex; justify-content:center; gap:20px; font-size:15px; font-family:'SF Mono',Menlo,monospace; font-weight:700; margin-bottom:12px; }
   .preview-box { background:#F1EFE6; border:1px solid rgba(0,0,0,0.15); padding:10px 12px; margin-bottom:12px; }
   .preview-box .ttl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:6px; }
   .preview-box .row { display:flex; align-items:baseline; justify-content:space-between; }
@@ -660,18 +660,18 @@ function render() {
     html += '<div class="custom-form">';
     html += '<div class="ttl">Add a new food</div>';
     html += '<div class="sub">Tell me the nutrition for a known amount \u2014 I\'ll work out the rate, then ask how much you actually had.</div>';
-    html += '<input id="custom-name" type="text" data-field="customDraft.n" placeholder="Description (e.g. Restaurant burger)" value="' + esc(d.n) + '">';
+    html += '<input id="custom-name" enterkeyhint="next" type="text" data-field="customDraft.n" placeholder="Description (e.g. Restaurant burger)" value="' + esc(d.n) + '">';
     html += '<div class="sublabel">Nutrition is for this much:</div>';
-    html += '<div class="amt-row"><input id="custom-amount" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
+    html += '<div class="amt-row"><input id="custom-amount" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
     html += '<select id="custom-unit" data-field="customDraft.unit">' +
       ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(d.unit===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving(s)':u)+'</option>'; }).join('') +
       '</select></div>';
     html += '<div class="sublabel">Nutrition for that amount:</div>';
     html += '<div class="grid2">' +
-      '<label>Calories<input id="custom-cal" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
-      '<label>Protein (g)<input id="custom-protein" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
-      '<label>Carbs (g)<input id="custom-carbs" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
-      '<label>Fat (g)<input id="custom-fat" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
+      '<label>Calories<input id="custom-cal" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
+      '<label>Protein (g)<input id="custom-protein" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
+      '<label>Carbs (g)<input id="custom-carbs" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
+      '<label>Fat (g)<input id="custom-fat" enterkeyhint="done" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
       '</div>';
     html += '<div class="checkbox-row"><input id="custom-save" type="checkbox" data-field="saveCustomForFuture" ' + (state.saveCustomForFuture?'checked':'') + '> Save to my foods so I can search for it next time</div>';
     html += '<button class="big-btn" data-action="defineCustomFood" ' + (!d.n.trim() ? 'disabled' : '') + '>Next: how much did you have?</button>';
@@ -758,11 +758,16 @@ function render() {
     html += '<div class="hdr2"><span class="name">' + esc(picked.n) + '</span><button data-action="closePicked">\u00d7</button></div>';
     html += '<div class="qty-stepper">';
     html += '<button data-action="adjustQty" data-value="-' + UNIT_STEP[picked.u] + '">\u2212</button>';
-    html += '<input id="qty-input" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="qty" value="' + state.qty + '">';
+    html += '<input id="qty-input" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="qty" value="' + state.qty + '">';
     html += '<span class="unit">' + UNIT_LABEL[picked.u] + '</span>';
     html += '<button data-action="adjustQty" data-value="' + UNIT_STEP[picked.u] + '">+</button>';
     html += '</div>';
-    html += '<div class="quick-stats"><span>' + round1(picked.p*state.qty) + 'p</span><span>' + round1(picked.c*state.qty) + 'cal</span><span>' + round1(picked.cb*state.qty) + 'c</span><span>' + round1(picked.f*state.qty) + 'f</span></div>';
+    html += '<div class="quick-stats">' +
+      '<span style="color:#2F6B45">' + round1(picked.p*state.qty) + 'p</span>' +
+      '<span style="color:#111">' + round1(picked.c*state.qty) + 'cal</span>' +
+      '<span style="color:#B5651D">' + round1(picked.cb*state.qty) + 'c</span>' +
+      '<span style="color:#9C2B1B">' + round1(picked.f*state.qty) + 'f</span>' +
+      '</div>';
 
     html += '<div class="preview-box"><div class="ttl">' + (state.view==='plan' ? "Day\'s plan would become" : 'Day would become') + '</div>';
     html += '<div class="row"><span class="l">Calories</span><span class="v">' + Math.round(projected.c) + (calorieGoal>0 ? '<span class="g"> /' + calorieGoal + '</span>' : '') + '</span></div>';
@@ -1134,6 +1139,24 @@ root.addEventListener('focusin', function(e) {
   }
 });
 
+// Auto-advance between custom food form fields on Enter / "Next" key
+var CUSTOM_FIELD_ORDER = ['custom-name','custom-amount','custom-cal','custom-protein','custom-carbs','custom-fat'];
+root.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' && e.key !== 'Next') return;
+  var id = e.target.id;
+  var idx = CUSTOM_FIELD_ORDER.indexOf(id);
+  if (idx === -1) return;
+  e.preventDefault();
+  var nextId = CUSTOM_FIELD_ORDER[idx + 1];
+  if (nextId) {
+    var next = document.getElementById(nextId);
+    if (next) { next.focus(); next.select(); }
+  } else {
+    // last field — blur to close keyboard
+    e.target.blur();
+  }
+});
+
 root.addEventListener('click', function(e) {
   var btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -1197,7 +1220,16 @@ root.addEventListener('input', function(e) {
   if (!field) return;
   var val = e.target.value;
   if (field === 'query') { state.query = val; render(); }
-  else if (field === 'qty') { state.qty = val === '' ? 0 : Number(val); render(); }
+  else if (field === 'qty') {
+    // strip any spaces iOS inserts (the cause of the 4.6 → 46 bug on iOS)
+    var cleaned = val.replace(/\s/g, '');
+    // allow partial input like "4." while typing — store the number but don't force-replace the display until blur
+    state.qty = cleaned === '' || cleaned === '.' ? 0 : Number(cleaned);
+    // if the cleaned value differs (spaces removed), update the DOM value without a full re-render to preserve cursor
+    var inputEl = document.getElementById('qty-input');
+    if (inputEl && cleaned !== val) inputEl.value = cleaned;
+    render();
+  }
   else if (field === 'burned') { setBurned(Math.max(0, Number(val) || 0)); render(); }
   else if (field === 'goals.protein' || field === 'goals.calories') {
     setPath(state, field, val);
@@ -1205,11 +1237,24 @@ root.addEventListener('input', function(e) {
     render();
   }
   else if (field.indexOf('customDraft.') === 0) {
-    setPath(state, field, val);
+    // strip iOS spaces on numeric sub-fields
+    var isNumField = ['customDraft.amount','customDraft.c','customDraft.p','customDraft.cb','customDraft.f'].indexOf(field) !== -1;
+    var cleanedVal = isNumField ? val.replace(/\s/g, '') : val;
+    setPath(state, field, cleanedVal);
+    if (isNumField && cleanedVal !== val) {
+      var fEl = document.getElementById(e.target.id);
+      if (fEl) fEl.value = cleanedVal;
+    }
     render();
   }
   else if (field.indexOf('editDraft.') === 0) {
-    setPath(state, field, val);
+    var isNumEditField = ['editDraft.c','editDraft.p','editDraft.cb','editDraft.f'].indexOf(field) !== -1;
+    var cleanedEdit = isNumEditField ? val.replace(/\s/g, '') : val;
+    setPath(state, field, cleanedEdit);
+    if (isNumEditField && cleanedEdit !== val) {
+      var eEl = document.getElementById(e.target.id);
+      if (eEl) eEl.value = cleanedEdit;
+    }
     render();
   }
   else if (field === 'copyDayTarget.date') {
