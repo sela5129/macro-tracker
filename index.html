@@ -443,6 +443,7 @@ var state = {
   openCats: {},
   picked: null,
   qty: 0,
+  qtyRaw: '0',
   showCustomForm: false,
   customDraft: { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' },
   saveCustomForFuture: true,
@@ -758,7 +759,7 @@ function render() {
     html += '<div class="hdr2"><span class="name">' + esc(picked.n) + '</span><button data-action="closePicked">\u00d7</button></div>';
     html += '<div class="qty-stepper">';
     html += '<button data-action="adjustQty" data-value="-' + UNIT_STEP[picked.u] + '">\u2212</button>';
-    html += '<input id="qty-input" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="qty" value="' + state.qty + '">';
+    html += '<input id="qty-input" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="qty" value="' + esc(state.qtyRaw) + '">';
     html += '<span class="unit">' + UNIT_LABEL[picked.u] + '</span>';
     html += '<button data-action="adjustQty" data-value="' + UNIT_STEP[picked.u] + '">+</button>';
     html += '</div>';
@@ -846,6 +847,13 @@ function render() {
 
   root.innerHTML = html;
 
+  // if user is mid-typing a qty (e.g. "4.") restore the raw display string
+  // so the decimal point doesn't get replaced by the parsed number "4"
+  if (_skipQtyInputReset) {
+    var qtyEl = document.getElementById('qty-input');
+    if (qtyEl) qtyEl.value = state.qtyRaw;
+  }
+
   if (activeId) {
     var el = document.getElementById(activeId);
     if (el) {
@@ -868,12 +876,12 @@ function findFood(id) {
 
 function pickFood(food) {
   state.picked = food;
-  state.qty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1;
+  state.qty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1; state.qtyRaw = String(state.qty);
 }
 
 function pickRecent(r) {
   state.picked = r;
-  state.qty = r.qty; // re-use the exact amount logged last time
+  state.qty = r.qty; state.qtyRaw = String(r.qty); // re-use the exact amount logged last time
 }
 
 function confirmAdd() {
@@ -892,7 +900,7 @@ function confirmAdd() {
   lsSet('recentFoods', nextRecents);
 
   state.picked = null;
-  state.qty = 0;
+  state.qty = 0; state.qtyRaw = '0';
   render();
 }
 
@@ -1037,7 +1045,7 @@ function defineCustomFood() {
   state.customDraft = { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' };
   state.showCustomForm = false;
   pickFood(food);
-  state.qty = amount;
+  state.qty = amount; state.qtyRaw = String(amount);
   render();
 }
 
@@ -1129,6 +1137,7 @@ function setPath(obj, path, value) {
 // Skipped when the focus event is the app's own programmatic refocus after a
 // re-render (e.g. after each keystroke), so typing multi-digit numbers works.
 var suppressNextFocusSelect = false;
+var _skipQtyInputReset = false; // set during qty typing to stop render() from overwriting "4." with "4"
 root.addEventListener('focusin', function(e) {
   if (suppressNextFocusSelect) {
     suppressNextFocusSelect = false;
@@ -1163,7 +1172,7 @@ root.addEventListener('click', function(e) {
   var action = btn.dataset.action;
   var value = btn.dataset.value;
 
-  if (action === 'setView') { state.view = value; state.picked = null; state.qty = 0; render(); }
+  if (action === 'setView') { state.view = value; state.picked = null; state.qty = 0; state.qtyRaw = '0'; render(); }
   else if (action === 'shiftDate') {
     var delta = Number(value);
     if (state.view === 'log') state.logDate = shiftDate(state.logDate, delta);
@@ -1186,7 +1195,7 @@ root.addEventListener('click', function(e) {
     if (r) { pickRecent(r); render(); }
   }
   else if (action === 'closePicked') { state.picked = null; state.qty = 0; render(); }
-  else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); render(); }
+  else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); state.qtyRaw = String(state.qty); render(); }
   else if (action === 'confirmAdd') { confirmAdd(); }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
   else if (action === 'duplicateEntry') { duplicateEntry(btn.dataset.id); }
@@ -1221,14 +1230,21 @@ root.addEventListener('input', function(e) {
   var val = e.target.value;
   if (field === 'query') { state.query = val; render(); }
   else if (field === 'qty') {
-    // strip any spaces iOS inserts (the cause of the 4.6 → 46 bug on iOS)
+    // strip any spaces iOS inserts after the decimal point
     var cleaned = val.replace(/\s/g, '');
-    // allow partial input like "4." while typing — store the number but don't force-replace the display until blur
-    state.qty = cleaned === '' || cleaned === '.' ? 0 : Number(cleaned);
-    // if the cleaned value differs (spaces removed), update the DOM value without a full re-render to preserve cursor
-    var inputEl = document.getElementById('qty-input');
-    if (inputEl && cleaned !== val) inputEl.value = cleaned;
+    // update the DOM directly if we stripped a space, so cursor stays correct
+    if (cleaned !== val) {
+      var qEl = document.getElementById('qty-input');
+      if (qEl) qEl.value = cleaned;
+    }
+    // keep raw string so "4." doesn't collapse to "4" during re-render
+    state.qtyRaw = cleaned;
+    state.qty = cleaned === '' || cleaned === '.' || cleaned === '0.' ? 0 : Number(cleaned);
+    // only re-render the preview/stats — but skip resetting the input value
+    // by marking a flag the render loop checks
+    _skipQtyInputReset = true;
     render();
+    _skipQtyInputReset = false;
   }
   else if (field === 'burned') { setBurned(Math.max(0, Number(val) || 0)); render(); }
   else if (field === 'goals.protein' || field === 'goals.calories') {
