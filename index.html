@@ -1317,21 +1317,25 @@ root.addEventListener('input', function(e) {
     var isNumField = ['customDraft.amount','customDraft.c','customDraft.p','customDraft.cb','customDraft.f'].indexOf(field) !== -1;
     var cleanedVal = isNumField ? val.replace(/\s/g, '') : val;
     setPath(state, field, cleanedVal);
+    // only patch the DOM minimally — no full rebuild so the keyboard stays attached
     if (isNumField && cleanedVal !== val) {
       var fEl = document.getElementById(e.target.id);
       if (fEl) fEl.value = cleanedVal;
     }
-    render();
+    // the only reactive element is the submit button's disabled state (depends on name being filled)
+    var submitBtn = document.querySelector('[data-action="defineCustomFood"]');
+    if (submitBtn) submitBtn.disabled = !state.customDraft.n.trim();
   }
   else if (field.indexOf('editDraft.') === 0) {
     var isNumEditField = ['editDraft.c','editDraft.p','editDraft.cb','editDraft.f'].indexOf(field) !== -1;
     var cleanedEdit = isNumEditField ? val.replace(/\s/g, '') : val;
     setPath(state, field, cleanedEdit);
+    // strip space in DOM if needed, no full rebuild
     if (isNumEditField && cleanedEdit !== val) {
       var eEl = document.getElementById(e.target.id);
       if (eEl) eEl.value = cleanedEdit;
     }
-    render();
+    // nothing else in the edit panel depends reactively on the current draft values while typing
   }
   else if (field === 'copyDayTarget.date') {
     state.copyDayTarget.date = val;
