@@ -65,17 +65,13 @@
   .scanner-status { position:relative; margin-top:24px; color:#fff; font-size:14px; text-align:center; padding:0 24px; z-index:1; }
   #scanner-cancel { position:absolute; bottom:40px; z-index:1; background:#fff; color:#111; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; font-size:13px; padding:10px 24px; border:0; border-radius:24px; cursor:pointer; }
   .lookup-spinner { display:inline-block; }
-  .recent-wrap { margin-top:16px; }
-  .recent-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:6px; padding:0 4px; }
-  .recent-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
-  .recent-chip { flex-shrink:0; background:#fff; border:2px solid #111; padding:8px 12px; text-align:left; cursor:pointer; }
-  .recent-chip .n { font-size:13px; font-weight:600; white-space:nowrap; }
-  .recent-chip .m { font-size:10px; font-family:'SF Mono', Menlo, monospace; color:rgba(0,0,0,0.5); white-space:nowrap; }
+  /* recently logged now shown inline in search dropdown */
   .search-box { margin-top:8px; position:relative; }
   .search-box .row { display:flex; align-items:center; background:#fff; border:2px solid #111; padding:8px 12px; gap:8px; }
   .search-box input { width:100%; border:0; background:none; font-size:15px; }
   .search-box .clear { background:none; border:0; color:rgba(0,0,0,0.4); font-size:18px; cursor:pointer; }
-  .results { position:relative; margin-top:4px; background:#fff; border:2px solid #111; max-height:288px; overflow-y:auto; }
+  .results { position:relative; margin-top:4px; background:#fff; border:2px solid #111; max-height:360px; overflow-y:auto; }
+  .results-section-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(0,0,0,0.4); padding:8px 12px 4px; background:#F8F7F3; border-top:1px solid rgba(0,0,0,0.08); }
   .result-item, .browse-item { width:100%; text-align:left; padding:10px 12px; border-bottom:1px solid rgba(0,0,0,0.1); background:none; border:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:14px; }
   .result-item .cal, .browse-item .cal { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-left:8px; flex-shrink:0; }
   .browse-wrap { margin-top:8px; background:#fff; border:2px solid #111; max-height:448px; overflow-y:auto; }
@@ -636,18 +632,6 @@ function render() {
   }
   html += '</div>';
 
-  // recently logged — quick re-add for snacks/leftovers, same qty as last time
-  if (state.recentFoods.length > 0 && !state.showCustomForm) {
-    html += '<div class="recent-wrap"><div class="recent-lbl">Recently Logged</div><div class="recent-row">';
-    state.recentFoods.forEach(function(r) {
-      html += '<button class="recent-chip" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
-        '<div class="n">' + esc(r.n) + '</div>' +
-        '<div class="m">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</div>' +
-        '</button>';
-    });
-    html += '</div></div>';
-  }
-
   // mode toggle
   html += '<div class="toggle4">';
   html += '<button data-action="setMode" data-value="search" class="' + (state.mode==='search' && !state.showCustomForm ? 'active':'') + '">\uD83D\uDD0D Search</button>';
@@ -695,16 +679,29 @@ function render() {
         html += '</div>';
       }
     } else {
+      var hasRecents = state.recentFoods.length > 0;
       var together = frequentlyTogether(entries);
-      if (together.length > 0) {
-        html += '<div class="recent-wrap"><div class="recent-lbl">Often Logged Together</div><div class="recent-row">';
-        together.forEach(function(f) {
-          html += '<button class="recent-chip" data-action="pickFood" data-id="' + esc(f.id) + '">' +
-            '<div class="n">' + esc(f.n) + '</div>' +
-            '<div class="m">' + round1(f.c) + 'cal/' + f.u + '</div>' +
-            '</button>';
-        });
-        html += '</div></div>';
+      if (hasRecents || together.length > 0) {
+        html += '<div class="results">';
+        if (hasRecents) {
+          html += '<div class="results-section-lbl">Recently Logged</div>';
+          state.recentFoods.forEach(function(r) {
+            html += '<button class="result-item" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
+              '<span>' + esc(r.n) + '</span>' +
+              '<span class="cal">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</span>' +
+              '</button>';
+          });
+        }
+        if (together.length > 0) {
+          html += '<div class="results-section-lbl">Often Logged Together</div>';
+          together.forEach(function(f) {
+            html += '<button class="result-item" data-action="pickFood" data-id="' + esc(f.id) + '">' +
+              '<span>' + esc(f.n) + '</span>' +
+              '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span>' +
+              '</button>';
+          });
+        }
+        html += '</div>';
       }
     }
     html += '</div>';
