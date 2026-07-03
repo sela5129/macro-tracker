@@ -451,6 +451,7 @@ var state = {
   showCopyDayPanel: false,
   copyDayTarget: { date: '', view: 'log' },
   showSync: false,
+  searchFocused: false,
   exportText: null,
   importText: null,
 };
@@ -534,6 +535,72 @@ function computeTotals(entries) {
 // Rendering
 // ---------------------------------------------------------------------------
 var root = document.getElementById('root');
+
+// Builds only the dropdown content (results or suggestions) — never rebuilds
+// the search input itself, so the keyboard stays attached while typing.
+function buildSearchResults() {
+  if (!state.searchFocused) return '';
+  var entries = getEntries();
+  var q = state.query.trim().toLowerCase();
+  var html = '';
+  if (q) {
+    var results = allFoods().filter(function(f){ return f.n.toLowerCase().indexOf(q) !== -1; }).slice(0, 8);
+    if (results.length) {
+      html += '<div class="results">';
+      results.forEach(function(f) {
+        html += '<button class="result-item" data-action="pickFood" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
+      });
+      html += '</div>';
+    }
+  } else {
+    var hasRecents = state.recentFoods.length > 0;
+    var together = frequentlyTogether(entries);
+    if (hasRecents || together.length > 0) {
+      html += '<div class="results">';
+      if (hasRecents) {
+        html += '<div class="results-section-lbl">Recently Logged</div>';
+        state.recentFoods.forEach(function(r) {
+          html += '<button class="result-item" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
+            '<span>' + esc(r.n) + '</span>' +
+            '<span class="cal">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</span>' +
+            '</button>';
+        });
+      }
+      if (together.length > 0) {
+        html += '<div class="results-section-lbl">Often Logged Together</div>';
+        together.forEach(function(f) {
+          html += '<button class="result-item" data-action="pickFood" data-id="' + esc(f.id) + '">' +
+            '<span>' + esc(f.n) + '</span>' +
+            '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span>' +
+            '</button>';
+        });
+      }
+      html += '</div>';
+    }
+  }
+  return html;
+}
+
+// Update only the results div — never touches the search input element.
+function updateSearchResults() {
+  var container = document.getElementById('src-results');
+  if (!container) return;
+  container.innerHTML = buildSearchResults();
+  // also sync the clear button without a full render
+  var clearBtn = document.querySelector('[data-action="clearQuery"]');
+  if (state.query && !clearBtn) {
+    var row = document.querySelector('.search-box .row');
+    if (row) {
+      var btn = document.createElement('button');
+      btn.className = 'clear';
+      btn.dataset.action = 'clearQuery';
+      btn.textContent = '\u00d7';
+      row.appendChild(btn);
+    }
+  } else if (!state.query && clearBtn) {
+    clearBtn.remove();
+  }
+}
 
 function macroRow(label, value, unit, color) {
   return '<div class="macro-row"><span class="lbl">' + label + '</span>' +
@@ -667,44 +734,9 @@ function render() {
     html += '<div class="search-box"><div class="row">\uD83D\uDD0D' +
       '<input id="search-input" type="text" data-field="query" placeholder="Search your foods\u2026" value="' + esc(state.query) + '">' +
       (state.query ? '<button class="clear" data-action="clearQuery">\u00d7</button>' : '') +
+      '</div>' +
+      '<div id="src-results"></div>' +   // filled in-place by updateSearchResults(), never rebuilt
       '</div>';
-    var q = state.query.trim().toLowerCase();
-    if (q) {
-      var results = allFoods().filter(function(f){ return f.n.toLowerCase().indexOf(q) !== -1; }).slice(0, 8);
-      if (results.length) {
-        html += '<div class="results">';
-        results.forEach(function(f) {
-          html += '<button class="result-item" data-action="pickFood" data-id="' + f.id + '"><span>' + esc(f.n) + '</span><span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
-        });
-        html += '</div>';
-      }
-    } else {
-      var hasRecents = state.recentFoods.length > 0;
-      var together = frequentlyTogether(entries);
-      if (hasRecents || together.length > 0) {
-        html += '<div class="results">';
-        if (hasRecents) {
-          html += '<div class="results-section-lbl">Recently Logged</div>';
-          state.recentFoods.forEach(function(r) {
-            html += '<button class="result-item" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
-              '<span>' + esc(r.n) + '</span>' +
-              '<span class="cal">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</span>' +
-              '</button>';
-          });
-        }
-        if (together.length > 0) {
-          html += '<div class="results-section-lbl">Often Logged Together</div>';
-          together.forEach(function(f) {
-            html += '<button class="result-item" data-action="pickFood" data-id="' + esc(f.id) + '">' +
-              '<span>' + esc(f.n) + '</span>' +
-              '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span>' +
-              '</button>';
-          });
-        }
-        html += '</div>';
-      }
-    }
-    html += '</div>';
   }
 
   if (state.editingFood) {
@@ -861,6 +893,9 @@ function render() {
       }
     }
   }
+
+  // always populate the search results container after a full render
+  updateSearchResults();
 }
 
 // ---------------------------------------------------------------------------
@@ -874,11 +909,15 @@ function findFood(id) {
 function pickFood(food) {
   state.picked = food;
   state.qty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1; state.qtyRaw = String(state.qty);
+  state.searchFocused = false;
+  state.query = '';
 }
 
 function pickRecent(r) {
   state.picked = r;
   state.qty = r.qty; state.qtyRaw = String(r.qty); // re-use the exact amount logged last time
+  state.searchFocused = false;
+  state.query = '';
 }
 
 function confirmAdd() {
@@ -1135,13 +1174,32 @@ function setPath(obj, path, value) {
 // re-render (e.g. after each keystroke), so typing multi-digit numbers works.
 var suppressNextFocusSelect = false;
 var _skipQtyInputReset = false; // set during qty typing to stop render() from overwriting "4." with "4"
+var _blurTimer = null;
+
 root.addEventListener('focusin', function(e) {
+  if (e.target.id === 'search-input') {
+    clearTimeout(_blurTimer);
+    if (!state.searchFocused) {
+      state.searchFocused = true;
+      updateSearchResults();
+    }
+  }
   if (suppressNextFocusSelect) {
     suppressNextFocusSelect = false;
     return;
   }
   if (e.target.tagName === 'INPUT' && (e.target.type === 'number' || e.target.type === 'text')) {
     e.target.select();
+  }
+});
+
+root.addEventListener('focusout', function(e) {
+  if (e.target.id === 'search-input') {
+    // small delay so tapping a result registers before the dropdown disappears
+    _blurTimer = setTimeout(function() {
+      state.searchFocused = false;
+      updateSearchResults();
+    }, 200);
   }
 });
 
@@ -1184,7 +1242,12 @@ root.addEventListener('click', function(e) {
   else if (action === 'copyPlanToLog') { copyPlanToLog(); }
   else if (action === 'setMode') { state.mode = value; state.showCustomForm = false; render(); }
   else if (action === 'toggleCustomForm') { state.showCustomForm = !state.showCustomForm; render(); }
-  else if (action === 'clearQuery') { state.query = ''; render(); }
+  else if (action === 'clearQuery') {
+    state.query = '';
+    var si = document.getElementById('search-input');
+    if (si) si.value = '';
+    updateSearchResults();
+  }
   else if (action === 'pickFood') { var f = findFood(btn.dataset.id); if (f) { pickFood(f); render(); } }
   else if (action === 'pickFoodAndSearch') { var f2 = findFood(btn.dataset.id); if (f2) { pickFood(f2); state.mode = 'search'; render(); } }
   else if (action === 'pickRecent') {
@@ -1225,7 +1288,7 @@ root.addEventListener('input', function(e) {
   var field = e.target.dataset.field;
   if (!field) return;
   var val = e.target.value;
-  if (field === 'query') { state.query = val; render(); }
+  if (field === 'query') { state.query = val; updateSearchResults(); }
   else if (field === 'qty') {
     // strip any spaces iOS inserts after the decimal point
     var cleaned = val.replace(/\s/g, '');
