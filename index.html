@@ -66,6 +66,13 @@
   #scanner-cancel { position:absolute; bottom:40px; z-index:1; background:#fff; color:#111; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; font-size:13px; padding:10px 24px; border:0; border-radius:24px; cursor:pointer; }
   .lookup-spinner { display:inline-block; }
   /* recently logged now shown inline in search dropdown */
+  .recent-wrap { margin-top:12px; }
+  .recent-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(0,0,0,0.4); margin-bottom:6px; padding:0 2px; }
+  .recent-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .recent-row::-webkit-scrollbar { display:none; }
+  .recent-chip { flex-shrink:0; background:#fff; border:2px solid #111; padding:8px 12px; text-align:left; cursor:pointer; max-width:160px; }
+  .recent-chip .n { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .recent-chip .m { font-size:10px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); white-space:nowrap; margin-top:2px; }
   .search-box { margin-top:8px; position:relative; }
   .search-box .row { display:flex; align-items:center; background:#fff; border:2px solid #111; padding:8px 12px; gap:8px; }
   .search-box input { width:100%; border:0; background:none; font-size:15px; }
@@ -500,26 +507,59 @@ function recordPair(newEntry, existingEntries) {
   lsSet('pairCounts', state.pairCounts);
 }
 
-function frequentlyTogether(entries) {
+// Smart suggestions: rank candidates by pair-count weighted by recency within today's log.
+// The most recently logged item gets the highest multiplier, so if you just logged
+// baby carrots, zesty Italian (its most common pair) rises to the top.
+function smartSuggestions(entries) {
   if (!entries.length) return [];
   var todayKeys = entries.map(identityKey);
+  var n = entries.length;
   var scores = {};
-  Object.keys(state.pairCounts).forEach(function(k) {
-    var parts = k.split('||');
-    todayKeys.forEach(function(tk) {
+  entries.forEach(function(entry, idx) {
+    // recency weight: last-logged item = n, first-logged item = 1
+    var weight = idx + 1;
+    var key = identityKey(entry);
+    Object.keys(state.pairCounts).forEach(function(k) {
+      var parts = k.split('||');
       var other = null;
-      if (parts[0] === tk) other = parts[1];
-      else if (parts[1] === tk) other = parts[0];
+      if (parts[0] === key) other = parts[1];
+      else if (parts[1] === key) other = parts[0];
       if (other && todayKeys.indexOf(other) === -1) {
-        scores[other] = (scores[other] || 0) + state.pairCounts[k];
+        scores[other] = (scores[other] || 0) + state.pairCounts[k] * weight;
       }
     });
   });
-  var ranked = Object.keys(scores).sort(function(a, b) { return scores[b] - scores[a]; }).slice(0, 6);
+  var ranked = Object.keys(scores).sort(function(a, b) { return scores[b] - scores[a]; }).slice(0, 8);
   var foods = allFoods();
   return ranked.map(function(key) {
     return foods.find(function(f) { return identityKey(f) === key; });
   }).filter(Boolean);
+}
+
+// Today's unique logged foods as horizontal chips (most recently logged first, up to 6)
+function buildTodayChips(entries) {
+  if (!entries.length) return '';
+  var seen = {};
+  var chips = [];
+  for (var i = entries.length - 1; i >= 0; i--) {
+    var e = entries[i];
+    var key = identityKey(e);
+    if (!seen[key]) {
+      seen[key] = true;
+      chips.push(e);
+      if (chips.length === 6) break;
+    }
+  }
+  if (!chips.length) return '';
+  var html = '<div class="recent-wrap"><div class="recent-lbl">Logged Today</div><div class="recent-row">';
+  chips.forEach(function(e) {
+    html += '<button class="recent-chip" data-action="pickRecent" data-id="' + esc(e.id) + '">' +
+      '<div class="n">' + esc(e.n) + '</div>' +
+      '<div class="m">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c * e.qty) + 'cal</div>' +
+      '</button>';
+  });
+  html += '</div></div>';
+  return html;
 }
 
 function computeTotals(entries) {
@@ -553,28 +593,28 @@ function buildSearchResults() {
       html += '</div>';
     }
   } else {
-    var hasRecents = state.recentFoods.length > 0;
-    var together = frequentlyTogether(entries);
-    if (hasRecents || together.length > 0) {
+    // Smart suggestions: recency-weighted pair matches from today's log
+    var suggestions = smartSuggestions(entries);
+    if (suggestions.length > 0) {
       html += '<div class="results">';
-      if (hasRecents) {
-        html += '<div class="results-section-lbl">Recently Logged</div>';
-        state.recentFoods.forEach(function(r) {
-          html += '<button class="result-item" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
-            '<span>' + esc(r.n) + '</span>' +
-            '<span class="cal">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</span>' +
-            '</button>';
-        });
-      }
-      if (together.length > 0) {
-        html += '<div class="results-section-lbl">Often Logged Together</div>';
-        together.forEach(function(f) {
-          html += '<button class="result-item" data-action="pickFood" data-id="' + esc(f.id) + '">' +
-            '<span>' + esc(f.n) + '</span>' +
-            '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span>' +
-            '</button>';
-        });
-      }
+      html += '<div class="results-section-lbl">Suggested for You</div>';
+      suggestions.forEach(function(f) {
+        html += '<button class="result-item" data-action="pickFood" data-id="' + esc(f.id) + '">' +
+          '<span>' + esc(f.n) + '</span>' +
+          '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span>' +
+          '</button>';
+      });
+      html += '</div>';
+    } else if (state.recentFoods.length > 0) {
+      // fall back to all-time recents until enough pairing data is built up
+      html += '<div class="results">';
+      html += '<div class="results-section-lbl">Recently Logged</div>';
+      state.recentFoods.forEach(function(r) {
+        html += '<button class="result-item" data-action="pickRecent" data-id="' + esc(r.id) + '">' +
+          '<span>' + esc(r.n) + '</span>' +
+          '<span class="cal">' + r.qty + UNIT_LABEL[r.u] + ' \u00b7 ' + round1(r.c * r.qty) + 'cal</span>' +
+          '</button>';
+      });
       html += '</div>';
     }
   }
@@ -698,6 +738,11 @@ function render() {
     html += '<button class="copy-btn" data-action="copyPlanToLog">Copy this plan into ' + prettyDate(state.planDate) + '\'s log</button>';
   }
   html += '</div>';
+
+  // "Logged Today" horizontal chips — today's entries deduped, most recent first, up to 6
+  if (state.view === 'log' && !state.showCustomForm) {
+    html += buildTodayChips(entries);
+  }
 
   // mode toggle
   html += '<div class="toggle4">';
@@ -1251,7 +1296,13 @@ root.addEventListener('click', function(e) {
   else if (action === 'pickFood') { var f = findFood(btn.dataset.id); if (f) { pickFood(f); render(); } }
   else if (action === 'pickFoodAndSearch') { var f2 = findFood(btn.dataset.id); if (f2) { pickFood(f2); state.mode = 'search'; render(); } }
   else if (action === 'pickRecent') {
-    var r = state.recentFoods.find(function(x){ return String(x.id) === btn.dataset.id; });
+    var id = btn.dataset.id;
+    // check today's entries first (from the "Logged Today" chips)
+    var todayEntries = getEntries();
+    var fromToday = todayEntries.find(function(x){ return String(x.id) === id; });
+    if (fromToday) { pickRecent(fromToday); render(); return; }
+    // fall back to all-time recentFoods (from search dropdown fallback)
+    var r = state.recentFoods.find(function(x){ return String(x.id) === id; });
     if (r) { pickRecent(r); render(); }
   }
   else if (action === 'closePicked') { state.picked = null; state.qty = 0; render(); }
