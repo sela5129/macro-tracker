@@ -1534,7 +1534,66 @@ function scanAndLookup() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Auto-apply Plan Ahead → Log at startup
+// ---------------------------------------------------------------------------
+// On every app open, check for any Plan Ahead entries for today or earlier
+// that haven't been applied to the Log yet. Copies them in automatically so
+// the log is pre-populated when you open the app the morning after planning.
+// Uses 'planApplied:YYYY-MM-DD' flags in localStorage to only ever copy once.
+
+function applyPendingPlans() {
+  var today = todayStr();
+  var applied = [];
+
+  var keys = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (k && k.indexOf('plan:') === 0) keys.push(k);
+  }
+
+  keys.forEach(function(planKey) {
+    var planDate = planKey.slice(5);
+    if (planDate > today) return;               // future plan — leave it
+    if (lsGet('planApplied:' + planDate, false)) return;  // already done
+
+    var planEntries = lsGet(planKey, []);
+    if (!planEntries.length) {
+      lsSet('planApplied:' + planDate, true);
+      return;
+    }
+
+    var logKey = 'log:' + planDate;
+    var logEntries = lsGet(logKey, []);
+    var existingIds = {};
+    logEntries.forEach(function(e){ existingIds[String(e.id)] = true; });
+
+    var toAdd = planEntries
+      .filter(function(e){ return !existingIds[String(e.id)]; })
+      .map(function(e){
+        return Object.assign({}, e, { id: 'pa-' + planDate + '-' + e.id });
+      });
+
+    if (toAdd.length) {
+      lsSet(logKey, logEntries.concat(toAdd));
+      applied.push({ date: planDate, count: toAdd.length });
+    }
+    lsSet('planApplied:' + planDate, true);
+  });
+
+  return applied;
+}
+
+var _autoApplied = applyPendingPlans();
+
 render();
+
+if (_autoApplied.length) {
+  var _msg = _autoApplied.map(function(a){
+    return a.count + ' item(s) from your ' + prettyDate(a.date) + ' plan';
+  }).join(', ');
+  setTimeout(function(){ showToast('\u2713 Auto-added: ' + _msg); }, 600);
+}
 </script>
 </body>
 </html>
