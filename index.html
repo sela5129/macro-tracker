@@ -81,7 +81,10 @@
   .results-section-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(0,0,0,0.4); padding:8px 12px 4px; background:#F8F7F3; border-top:1px solid rgba(0,0,0,0.08); }
   .result-item, .browse-item { width:100%; text-align:left; padding:10px 12px; border-bottom:1px solid rgba(0,0,0,0.1); background:none; border:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:14px; }
   .result-item .cal, .browse-item .cal { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); margin-left:8px; flex-shrink:0; }
-  .browse-wrap { margin-top:8px; background:#fff; border:2px solid #111; max-height:448px; overflow-y:auto; }
+  .browse-wrap { margin-top:0; background:#fff; border:2px solid #111; border-top:0; max-height:400px; overflow-y:auto; }
+  .browse-search-row { margin-top:8px; display:flex; align-items:center; background:#fff; border:2px solid #111; padding:8px 12px; gap:8px; }
+  .browse-search-row input { flex:1; border:0; background:none; font-size:15px; outline:none; }
+  .browse-search-clear { background:none; border:0; color:rgba(0,0,0,0.4); font-size:18px; cursor:pointer; padding:0 2px; }
   .cat-hdr { width:100%; display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#F1EFE6; border:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; cursor:pointer; }
   .cat-hdr.custom { background:#EFE8D8; }
   .cat-hdr .right { display:flex; align-items:center; gap:8px; font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.4); }
@@ -455,7 +458,8 @@ var state = {
   toast: '',
   editingFood: null,        // food object currently being edited, or null
   editDraft: null,          // { n, u, p, c, cb, f } draft while editing
-  confirmDeleteId: null,    // food id pending delete confirmation
+  confirmDeleteId: null,
+  browseQuery: '',
   showCopyDayPanel: false,
   copyDayTarget: { date: '', view: 'log' },
   showSync: false,
@@ -804,27 +808,47 @@ function render() {
   }
 
   if (state.mode === 'browse' && !state.showCustomForm) {
+    var bq = state.browseQuery.trim().toLowerCase();
+    html += '<div class="browse-search-row">' +
+      '<input id="browse-search" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="browseQuery" placeholder="\uD83D\uDD0D Filter foods\u2026" value="' + esc(state.browseQuery) + '">' +
+      (state.browseQuery ? '<button class="browse-search-clear" data-action="clearBrowseQuery">\u00d7</button>' : '') +
+      '</div>';
+
     html += '<div class="browse-wrap">';
-    if (state.customFoods.length > 0) {
-      var isOpen = !!state.openCats['My Custom Foods'];
-      var list = state.customFoods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
-      html += '<div><button class="cat-hdr custom ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="My Custom Foods"><span>My Custom Foods</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
-      if (isOpen) {
-        list.forEach(function(f) { html += browseRow(f); });
+
+    if (bq) {
+      // flat filtered list across all foods
+      var allForBrowse = state.customFoods.concat(effectiveBaseFoods());
+      var filtered = allForBrowse.filter(function(f){ return f.n.toLowerCase().indexOf(bq) !== -1; })
+        .sort(function(a,b){ return a.n.localeCompare(b.n); });
+      if (filtered.length) {
+        filtered.forEach(function(f) { html += browseRow(f); });
+      } else {
+        html += '<div style="padding:16px 12px;font-size:13px;color:rgba(0,0,0,0.4)">No foods match \u201c' + esc(state.browseQuery) + '\u201d</div>';
       }
-      html += '</div>';
+    } else {
+      // normal category view
+      if (state.customFoods.length > 0) {
+        var isOpen = !!state.openCats['My Custom Foods'];
+        var list = state.customFoods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
+        html += '<div><button class="cat-hdr custom ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="My Custom Foods"><span>My Custom Foods</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
+        if (isOpen) {
+          list.forEach(function(f) { html += browseRow(f); });
+        }
+        html += '</div>';
+      }
+      CATEGORY_ORDER.forEach(function(cat) {
+        var ids = IDS_BY_CATEGORY[cat];
+        var list = ids.map(getFoodById).filter(Boolean).sort(function(a,b){ return a.n.localeCompare(b.n); });
+        if (!list.length) return;
+        var isOpen = !!state.openCats[cat];
+        html += '<div><button class="cat-hdr ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="' + esc(cat) + '"><span>' + esc(cat) + '</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
+        if (isOpen) {
+          list.forEach(function(f) { html += browseRow(f); });
+        }
+        html += '</div>';
+      });
     }
-    CATEGORY_ORDER.forEach(function(cat) {
-      var ids = IDS_BY_CATEGORY[cat];
-      var list = ids.map(getFoodById).filter(Boolean).sort(function(a,b){ return a.n.localeCompare(b.n); });
-      if (!list.length) return;
-      var isOpen = !!state.openCats[cat];
-      html += '<div><button class="cat-hdr ' + (isOpen?'open':'') + '" data-action="toggleCat" data-cat="' + esc(cat) + '"><span>' + esc(cat) + '</span><span class="right">' + list.length + '<span class="chev">\u25be</span></span></button>';
-      if (isOpen) {
-        list.forEach(function(f) { html += browseRow(f); });
-      }
-      html += '</div>';
-    });
     html += '</div>';
   }
 
@@ -1327,13 +1351,19 @@ root.addEventListener('click', function(e) {
     render();
   }
   else if (action === 'copyPlanToLog') { copyPlanToLog(); }
-  else if (action === 'setMode') { state.mode = value; state.showCustomForm = false; render(); }
+  else if (action === 'setMode') { state.mode = value; state.showCustomForm = false; if (value !== 'browse') state.browseQuery = ''; render(); }
   else if (action === 'toggleCustomForm') { state.showCustomForm = !state.showCustomForm; render(); }
   else if (action === 'clearQuery') {
     state.query = '';
     var si = document.getElementById('search-input');
     if (si) si.value = '';
     updateSearchResults();
+  }
+  else if (action === 'clearBrowseQuery') {
+    state.browseQuery = '';
+    render();
+    var bs = document.getElementById('browse-search');
+    if (bs) { bs.focus(); }
   }
   else if (action === 'pickFood') { var f = findFood(btn.dataset.id); if (f) { pickFood(f); render(); } }
   else if (action === 'pickFoodAndSearch') { var f2 = findFood(btn.dataset.id); if (f2) { pickFood(f2); state.mode = 'search'; render(); } }
@@ -1383,6 +1413,7 @@ root.addEventListener('input', function(e) {
   if (!field) return;
   var val = e.target.value;
   if (field === 'query') { state.query = val; updateSearchResults(); }
+  else if (field === 'browseQuery') { state.browseQuery = val; render(); }
   else if (field === 'qty') {
     // strip any spaces iOS inserts after the decimal point
     var cleaned = val.replace(/\s/g, '');
