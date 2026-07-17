@@ -142,6 +142,7 @@
   .entries-hdr .status { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:#2F6B45; }
   .clear-day-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:#9C2B1B; background:none; border:0; text-decoration:underline; cursor:pointer; }
   .copy-day-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.6); background:none; border:0; text-decoration:underline; cursor:pointer; margin-right:12px; }
+  .pull-plan-btn { display:block; width:100%; background:#2F6B45; color:#fff; border:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:11px 16px; cursor:pointer; margin-bottom:10px; text-align:center; }
   .copy-day-panel { background:#F1EFE6; border:2px solid #111; padding:12px; margin-bottom:10px; }
   .copy-day-panel .ttl { font-size:12px; font-weight:700; margin-bottom:8px; }
   .copy-day-panel .row { display:flex; gap:8px; margin-bottom:10px; }
@@ -858,10 +859,27 @@ function render() {
     html += '</div>';
   }
 
+  // check if there's a plan for this date with items not already in the log (Log view only)
+  var planForDate = state.view === 'log' ? lsGet('plan:' + date, []) : [];
+  var logIds = {};
+  entries.forEach(function(e){ logIds[String(e.id)] = true; });
+  var unpulledPlanItems = planForDate.filter(function(e){
+    return !logIds['pa-' + date + '-' + e.id] && !logIds[String(e.id)];
+  });
+  var hasPlan = unpulledPlanItems.length > 0;
+
   html += '<div class="entries-hdr"><span class="lbl">' + (state.view==='plan'?'Planned':'Logged') + ' (' + entries.length + ')</span>' +
+    '<span>' +
     (entries.length > 0
-      ? '<span><button class="copy-day-btn" data-action="openCopyDay">Copy day</button><button class="clear-day-btn" data-action="clearDay">Clear day</button></span>'
-      : '<span class="status">\u2713 Saved</span>') + '</div>';
+      ? '<button class="copy-day-btn" data-action="openCopyDay">Copy day</button><button class="clear-day-btn" data-action="clearDay">Clear day</button>'
+      : '<span class="status">\u2713 Saved</span>') +
+    '</span></div>';
+
+  if (hasPlan) {
+    html += '<button class="pull-plan-btn" data-action="pullFromPlan">' +
+      '\u2193 Pull ' + unpulledPlanItems.length + ' item(s) from today\'s plan into log' +
+      '</button>';
+  }
 
   if (state.showCopyDayPanel) {
     var cd = state.copyDayTarget;
@@ -1193,6 +1211,30 @@ function confirmDeleteFood(id) {
   render();
 }
 
+function pullFromPlan() {
+  var date = currentDate();
+  var planEntries = lsGet('plan:' + date, []);
+  if (!planEntries.length) { showToast('No plan found for ' + prettyDate(date)); return; }
+
+  var logEntries = getEntries();
+  var existingIds = {};
+  logEntries.forEach(function(e){ existingIds[String(e.id)] = true; });
+
+  // only pull items not already in the log (check both original id and pa- prefixed id)
+  var toAdd = planEntries
+    .filter(function(e){
+      return !existingIds['pa-' + date + '-' + e.id] && !existingIds[String(e.id)];
+    })
+    .map(function(e){
+      return Object.assign({}, e, { id: 'pa-' + date + '-' + e.id });
+    });
+
+  if (!toAdd.length) { showToast('Everything from your plan is already in today\u2019s log'); return; }
+  setEntries(logEntries.concat(toAdd));
+  showToast('\u2713 Added ' + toAdd.length + ' item(s) from your ' + prettyDate(date) + ' plan');
+  render();
+}
+
 function copyPlanToLog() {
   var planEntries = getEntries();
   var logEntries = lsGet('log:' + state.planDate, []);
@@ -1312,6 +1354,7 @@ root.addEventListener('click', function(e) {
   else if (action === 'duplicateEntry') { duplicateEntry(btn.dataset.id); }
   else if (action === 'clearDay') { clearDay(); }
   else if (action === 'openCopyDay') { openCopyDay(); }
+  else if (action === 'pullFromPlan') { pullFromPlan(); }
   else if (action === 'cancelCopyDay') { cancelCopyDay(); }
   else if (action === 'performCopyDay') { performCopyDay(); }
   else if (action === 'toggleSync') { toggleSync(); }
@@ -1534,66 +1577,7 @@ function scanAndLookup() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Auto-apply Plan Ahead → Log at startup
-// ---------------------------------------------------------------------------
-// On every app open, check for any Plan Ahead entries for today or earlier
-// that haven't been applied to the Log yet. Copies them in automatically so
-// the log is pre-populated when you open the app the morning after planning.
-// Uses 'planApplied:YYYY-MM-DD' flags in localStorage to only ever copy once.
-
-function applyPendingPlans() {
-  var today = todayStr();
-  var applied = [];
-
-  var keys = [];
-  for (var i = 0; i < localStorage.length; i++) {
-    var k = localStorage.key(i);
-    if (k && k.indexOf('plan:') === 0) keys.push(k);
-  }
-
-  keys.forEach(function(planKey) {
-    var planDate = planKey.slice(5);
-    if (planDate > today) return;               // future plan — leave it
-    if (lsGet('planApplied:' + planDate, false)) return;  // already done
-
-    var planEntries = lsGet(planKey, []);
-    if (!planEntries.length) {
-      lsSet('planApplied:' + planDate, true);
-      return;
-    }
-
-    var logKey = 'log:' + planDate;
-    var logEntries = lsGet(logKey, []);
-    var existingIds = {};
-    logEntries.forEach(function(e){ existingIds[String(e.id)] = true; });
-
-    var toAdd = planEntries
-      .filter(function(e){ return !existingIds[String(e.id)]; })
-      .map(function(e){
-        return Object.assign({}, e, { id: 'pa-' + planDate + '-' + e.id });
-      });
-
-    if (toAdd.length) {
-      lsSet(logKey, logEntries.concat(toAdd));
-      applied.push({ date: planDate, count: toAdd.length });
-    }
-    lsSet('planApplied:' + planDate, true);
-  });
-
-  return applied;
-}
-
-var _autoApplied = applyPendingPlans();
-
 render();
-
-if (_autoApplied.length) {
-  var _msg = _autoApplied.map(function(a){
-    return a.count + ' item(s) from your ' + prettyDate(a.date) + ' plan';
-  }).join(', ');
-  setTimeout(function(){ showToast('\u2713 Auto-added: ' + _msg); }, 600);
-}
 </script>
 </body>
 </html>
