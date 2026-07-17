@@ -885,10 +885,11 @@ function render() {
 
   // check if there's a plan for this date with items not already in the log (Log view only)
   var planForDate = state.view === 'log' ? lsGet('plan:' + date, []) : [];
-  var logIds = {};
-  entries.forEach(function(e){ logIds[String(e.id)] = true; });
+  // build a set of food identities (name::unit) already in today's log
+  var loggedKeys = {};
+  entries.forEach(function(e){ loggedKeys[e.n.toLowerCase() + '::' + e.u] = true; });
   var unpulledPlanItems = planForDate.filter(function(e){
-    return !logIds['pa-' + date + '-' + e.id] && !logIds[String(e.id)];
+    return !loggedKeys[e.n.toLowerCase() + '::' + e.u];
   });
   var hasPlan = unpulledPlanItems.length > 0;
 
@@ -1241,17 +1242,13 @@ function pullFromPlan() {
   if (!planEntries.length) { showToast('No plan found for ' + prettyDate(date)); return; }
 
   var logEntries = getEntries();
-  var existingIds = {};
-  logEntries.forEach(function(e){ existingIds[String(e.id)] = true; });
+  // match by food name + unit so manually-logged duplicates are also caught
+  var loggedKeys = {};
+  logEntries.forEach(function(e){ loggedKeys[e.n.toLowerCase() + '::' + e.u] = true; });
 
-  // only pull items not already in the log (check both original id and pa- prefixed id)
   var toAdd = planEntries
-    .filter(function(e){
-      return !existingIds['pa-' + date + '-' + e.id] && !existingIds[String(e.id)];
-    })
-    .map(function(e){
-      return Object.assign({}, e, { id: 'pa-' + date + '-' + e.id });
-    });
+    .filter(function(e){ return !loggedKeys[e.n.toLowerCase() + '::' + e.u]; })
+    .map(function(e){ return Object.assign({}, e, { id: 'pa-' + date + '-' + e.id }); });
 
   if (!toAdd.length) { showToast('Everything from your plan is already in today\u2019s log'); return; }
   setEntries(logEntries.concat(toAdd));
