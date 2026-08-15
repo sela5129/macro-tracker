@@ -155,9 +155,20 @@
   .copy-day-panel .save-btn { background:#111; color:#fff; }
   .copy-day-panel .cancel-btn { background:#eee; color:#111; }
   .empty-state { text-align:center; color:rgba(0,0,0,0.3); font-size:14px; padding:32px 16px; border:2px dashed rgba(0,0,0,0.15); }
-  .entry { background:#fff; border:1px solid rgba(0,0,0,0.2); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .entry { background:#fff; border:1px solid rgba(0,0,0,0.2); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:8px; }
+  .entry-selected { background:#f0f8f4; border-color:#2F6B45; }
+  .entry-cb { width:18px; height:18px; flex-shrink:0; cursor:pointer; accent-color:#2F6B45; }
+  .entry-body { flex:1; min-width:0; }
   .entry .name { font-size:14px; font-weight:600; }
   .entry .meta { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); }
+  .combine-bar { display:flex; align-items:center; gap:8px; background:#f0f8f4; border:2px solid #2F6B45; padding:10px 12px; margin-bottom:8px; flex-wrap:wrap; }
+  .combine-bar span { font-size:12px; font-weight:700; color:#2F6B45; flex:1; }
+  .combine-btn { background:#2F6B45; color:#fff; border:0; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; padding:7px 12px; cursor:pointer; }
+  .combine-cancel { background:none; border:0; font-size:11px; font-weight:700; text-transform:uppercase; color:rgba(0,0,0,0.5); cursor:pointer; }
+  .sublabel { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.5); margin-bottom:4px; margin-top:4px; }
+  .amt-row { display:flex; gap:8px; margin-bottom:8px; }
+  .amt-row input { flex:1; border:2px solid rgba(0,0,0,0.2); padding:6px 8px; font-size:16px; }
+  .amt-row select { border:2px solid rgba(0,0,0,0.2); padding:6px 8px; font-size:16px; background:#fff; }
   .entry button { background:none; border:0; font-size:18px; color:rgba(0,0,0,0.4); padding:6px; cursor:pointer; }
   .entry-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
   .entry-actions button:active { color:#111; }
@@ -384,9 +395,9 @@ CATEGORY_ORDER.forEach(function(cat) {
   IDS_BY_CATEGORY[cat] = FOODS.filter(function(f){ return (CATEGORY[f.n] || 'Other') === cat; }).map(function(f){ return f.id; });
 });
 
-var UNIT_LABEL = { g: 'g', oz: 'oz', ml: 'ml', serving: 'serving' };
-var UNIT_STEP = { g: 5, oz: 0.5, ml: 10, serving: 0.5 };
-var UNIT_DEFAULT = { g: 100, oz: 4, ml: 250, serving: 1 };
+var UNIT_LABEL = { g: 'g', oz: 'oz', ml: 'ml', serving: 'serving', piece: 'pc' };
+var UNIT_STEP = { g: 5, oz: 0.5, ml: 10, serving: 0.5, piece: 1 };
+var UNIT_DEFAULT = { g: 100, oz: 4, ml: 250, serving: 1, piece: 1 };
 
 // ---------------------------------------------------------------------------
 // Date helpers
@@ -459,7 +470,8 @@ var state = {
   showGoals: false,
   toast: '',
   editingFood: null,        // food object currently being edited, or null
-  editDraft: null,          // { n, u, p, c, cb, f } draft while editing
+  editDraft: null,          // { n, u, amount, p, c, cb, f } draft while editing — values are TOTALS for `amount` units
+  selectedForCombine: {},   // entry ids selected to combine into a custom food
   confirmDeleteId: null,
   browseQuery: '',
   showCopyDayPanel: false,
@@ -768,7 +780,7 @@ function render() {
     html += '<div class="sublabel">Nutrition is for this much:</div>';
     html += '<div class="amt-row"><input id="custom-amount" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.amount" placeholder="e.g. 100" value="' + esc(d.amount) + '">';
     html += '<select id="custom-unit" data-field="customDraft.unit">' +
-      ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(d.unit===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving(s)':u)+'</option>'; }).join('') +
+      ['g','oz','ml','serving','piece'].map(function(u){ return '<option value="'+u+'"'+(d.unit===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving(s)':u==='piece'?'piece(s)':u)+'</option>'; }).join('') +
       '</select></div>';
     html += '<div class="sublabel">Nutrition for that amount:</div>';
     html += '<div class="grid2">' +
@@ -793,17 +805,23 @@ function render() {
 
   if (state.editingFood) {
     var ed = state.editDraft;
+    var unitOptions = ['g','oz','ml','serving','piece'].map(function(u){
+      var label = u==='g'?'grams':u==='serving'?'serving(s)':u==='piece'?'piece(s)':u;
+      return '<option value="'+u+'"'+(ed.u===u?' selected':'')+'>'+label+'</option>';
+    }).join('');
     html += '<div class="edit-food-panel">';
     html += '<div class="ttl">Edit Food</div>';
     html += '<input id="edit-name" type="text" data-field="editDraft.n" value="' + esc(ed.n) + '" placeholder="Name">';
+    html += '<div class="sublabel">Nutrition is for this much:</div>';
+    html += '<div class="amt-row">' +
+      '<input id="edit-amount" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.amount" placeholder="e.g. 240" value="' + esc(ed.amount) + '">' +
+      '<select id="edit-unit" data-field="editDraft.u">' + unitOptions + '</select></div>';
+    html += '<div class="sublabel">Nutrition for that amount:</div>';
     html += '<div class="grid2">' +
-      '<label>Unit<select id="edit-unit" data-field="editDraft.u">' +
-        ['g','oz','ml','serving'].map(function(u){ return '<option value="'+u+'"'+(ed.u===u?' selected':'')+'>'+(u==='g'?'grams':u==='serving'?'serving':u)+'</option>'; }).join('') +
-      '</select></label>' +
-      '<label>Calories / unit<input id="edit-cal" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.c" value="' + esc(ed.c) + '"></label>' +
-      '<label>Protein / unit (g)<input id="edit-protein" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.p" value="' + esc(ed.p) + '"></label>' +
-      '<label>Carbs / unit (g)<input id="edit-carbs" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.cb" value="' + esc(ed.cb) + '"></label>' +
-      '<label>Fat / unit (g)<input id="edit-fat" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="editDraft.f" value="' + esc(ed.f) + '"></label>' +
+      '<label>Calories<input id="edit-cal" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.c" value="' + esc(ed.c) + '"></label>' +
+      '<label>Protein (g)<input id="edit-protein" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.p" value="' + esc(ed.p) + '"></label>' +
+      '<label>Carbs (g)<input id="edit-carbs" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.cb" value="' + esc(ed.cb) + '"></label>' +
+      '<label>Fat (g)<input id="edit-fat" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.f" value="' + esc(ed.f) + '"></label>' +
       '</div>';
     html += '<div class="btn-row"><button class="cancel-btn" data-action="cancelEditFood">Cancel</button><button class="save-btn" data-action="saveEditFood">Save</button></div>';
     html += '</div>';
@@ -895,6 +913,14 @@ function render() {
   });
   var hasPlan = unpulledPlanItems.length > 0;
 
+  var anySelected = Object.keys(state.selectedForCombine).length > 0;
+  if (anySelected) {
+    var selectedCount = Object.keys(state.selectedForCombine).length;
+    html += '<div class="combine-bar"><span>' + selectedCount + ' item(s) selected</span>' +
+      '<button class="combine-btn" data-action="combineSelected">Combine into 1 custom food</button>' +
+      '<button class="combine-cancel" data-action="clearCombineSelection">Cancel</button></div>';
+  }
+
   html += '<div class="entries-hdr"><span class="lbl">' + (state.view==='plan'?'Planned':'Logged') + ' (' + entries.length + ')</span>' +
     '<span>' +
     (entries.length > 0
@@ -927,7 +953,10 @@ function render() {
     html += '<div class="empty-state">' + (state.view==='plan' ? 'Nothing planned yet \u2014 search above to add what you\'ll eat.' : 'Nothing logged yet \u2014 search above to add a food.') + '</div>';
   } else {
     entries.forEach(function(e) {
-      html += '<div class="entry"><div><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div>' +
+      var checked = !!state.selectedForCombine[String(e.id)];
+      html += '<div class="entry' + (checked ? ' entry-selected' : '') + '">' +
+        '<input type="checkbox" class="entry-cb" data-action="toggleCombineEntry" data-id="' + e.id + '"' + (checked?' checked':'') + '>' +
+        '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div>' +
         '<div class="entry-actions">' +
           '<button data-action="duplicateEntry" data-id="' + e.id + '" aria-label="Repeat this">\uD83D\uDCCB</button>' +
           '<button data-action="removeEntry" data-id="' + e.id + '" aria-label="Delete">\uD83D\uDDD1</button>' +
@@ -1178,8 +1207,28 @@ function defineCustomFood() {
 function startEditFood(id) {
   var food = isCustomId(id) ? state.customFoods.find(function(f){ return String(f.id) === String(id); }) : getFoodById(id);
   if (!food) return;
+
+  // Use the last logged quantity of this food as the reference amount so the
+  // user sees familiar numbers (e.g. 240ml at 30cal) rather than per-unit rates (0.125cal/ml)
+  var entries = getEntries();
+  var lastLogged = null;
+  for (var i = entries.length - 1; i >= 0; i--) {
+    if (entries[i].n === food.n && entries[i].u === food.u) { lastLogged = entries[i]; break; }
+  }
+  if (!lastLogged) {
+    state.recentFoods.forEach(function(r){ if (!lastLogged && r.n === food.n && r.u === food.u) lastLogged = r; });
+  }
+  var refAmount = lastLogged ? lastLogged.qty : (UNIT_DEFAULT[food.u] || 1);
+
   state.editingFood = food;
-  state.editDraft = { n: food.n, u: food.u, p: String(food.p), c: String(food.c), cb: String(food.cb), f: String(food.f) };
+  state.editDraft = {
+    n: food.n, u: food.u,
+    amount: String(refAmount),
+    c:  String(round1(food.c  * refAmount)),
+    p:  String(round1(food.p  * refAmount)),
+    cb: String(round1(food.cb * refAmount)),
+    f:  String(round1(food.f  * refAmount)),
+  };
   state.confirmDeleteId = null;
   render();
 }
@@ -1194,13 +1243,15 @@ function saveEditFood() {
   if (!state.editingFood) return;
   var id = state.editingFood.id;
   var d = state.editDraft;
+  var amount = Number(d.amount) || 1;
+  // d.p/c/cb/f are totals for `amount` units — divide back to per-unit rate
   var updated = {
-    n: d.n.trim() || state.editingFood.n,
-    u: d.u,
-    p: Number(d.p) || 0,
-    c: Number(d.c) || 0,
-    cb: Number(d.cb) || 0,
-    f: Number(d.f) || 0,
+    n:  d.n.trim() || state.editingFood.n,
+    u:  d.u,
+    p:  (Number(d.p)  || 0) / amount,
+    c:  (Number(d.c)  || 0) / amount,
+    cb: (Number(d.cb) || 0) / amount,
+    f:  (Number(d.f)  || 0) / amount,
   };
   if (isCustomId(id)) {
     state.customFoods = state.customFoods.map(function(f) {
@@ -1236,6 +1287,80 @@ function confirmDeleteFood(id) {
   }
   state.confirmDeleteId = null;
   render();
+}
+
+function toggleCombineEntry(id) {
+  id = String(id);
+  if (state.selectedForCombine[id]) {
+    delete state.selectedForCombine[id];
+  } else {
+    state.selectedForCombine[id] = true;
+  }
+  var count = Object.keys(state.selectedForCombine).length;
+  // update the entry's selected style without a full re-render (avoids stale checkbox references)
+  document.querySelectorAll('.entry').forEach(function(el) {
+    var cb = el.querySelector('.entry-cb');
+    if (!cb) return;
+    var eid = cb.dataset.id;
+    if (eid === id) el.classList.toggle('entry-selected', !!state.selectedForCombine[id]);
+  });
+  // update or add the combine bar
+  var existing = document.querySelector('.combine-bar');
+  if (count > 0) {
+    var barHtml = '<span>' + count + ' item(s) selected</span>' +
+      '<button class="combine-btn" data-action="combineSelected">Combine into 1 custom food</button>' +
+      '<button class="combine-cancel" data-action="clearCombineSelection">Cancel</button>';
+    if (existing) {
+      existing.innerHTML = barHtml;
+    } else {
+      var hdr = document.querySelector('.entries-hdr');
+      if (hdr) {
+        var bar = document.createElement('div');
+        bar.className = 'combine-bar';
+        bar.innerHTML = barHtml;
+        hdr.parentNode.insertBefore(bar, hdr);
+      }
+    }
+  } else if (existing) {
+    existing.parentNode.removeChild(existing);
+  }
+}
+
+function clearCombineSelection() {
+  state.selectedForCombine = {};
+  render();
+}
+
+function combineSelected() {
+  var entries = getEntries();
+  var selected = entries.filter(function(e){ return !!state.selectedForCombine[String(e.id)]; });
+  if (selected.length < 2) { showToast('Select at least 2 items to combine'); return; }
+
+  // sum all macros at their logged quantities
+  var totalC = 0, totalP = 0, totalCb = 0, totalF = 0;
+  selected.forEach(function(e){
+    totalC  += e.c  * e.qty;
+    totalP  += e.p  * e.qty;
+    totalCb += e.cb * e.qty;
+    totalF  += e.f  * e.qty;
+  });
+
+  // open the custom form pre-filled with combined totals (1 serving = this whole combined amount)
+  state.customDraft = {
+    n: '', amount: '1', unit: 'serving',
+    c:  String(round1(totalC)),
+    p:  String(round1(totalP)),
+    cb: String(round1(totalCb)),
+    f:  String(round1(totalF)),
+  };
+  state.showCustomForm = true;
+  state.selectedForCombine = {};
+  render();
+  // focus the name field so they can type the combined food name
+  setTimeout(function(){
+    var nf = document.getElementById('custom-name');
+    if (nf) { nf.focus(); nf.select(); }
+  }, 100);
 }
 
 function pullFromPlan() {
@@ -1390,6 +1515,9 @@ root.addEventListener('click', function(e) {
   else if (action === 'confirmAdd') { confirmAdd(); }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
   else if (action === 'duplicateEntry') { duplicateEntry(btn.dataset.id); }
+  else if (action === 'toggleCombineEntry') { toggleCombineEntry(btn.dataset.id); }
+  else if (action === 'combineSelected') { combineSelected(); }
+  else if (action === 'clearCombineSelection') { clearCombineSelection(); }
   else if (action === 'clearDay') { clearDay(); }
   else if (action === 'openCopyDay') { openCopyDay(); }
   else if (action === 'pullFromPlan') { pullFromPlan(); }
@@ -1460,7 +1588,7 @@ root.addEventListener('input', function(e) {
     if (submitBtn) submitBtn.disabled = !state.customDraft.n.trim();
   }
   else if (field.indexOf('editDraft.') === 0) {
-    var isNumEditField = ['editDraft.c','editDraft.p','editDraft.cb','editDraft.f'].indexOf(field) !== -1;
+    var isNumEditField = ['editDraft.amount','editDraft.c','editDraft.p','editDraft.cb','editDraft.f'].indexOf(field) !== -1;
     var cleanedEdit = isNumEditField ? val.replace(/\s/g, '') : val;
     setPath(state, field, cleanedEdit);
     // strip space in DOM if needed, no full rebuild
