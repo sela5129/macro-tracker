@@ -454,6 +454,7 @@ var state = {
   burned: 0,
   customFoods: lsGet('customFoods', []),
   recentFoods: lsGet('recentFoods', []),
+  defaultAmounts: lsGet('defaultAmounts', {}), // keyed by "name::unit", set on edit or initial custom entry
   foodEdits: lsGet('foodEdits', {}),       // overrides for base spreadsheet foods, keyed by id
   deletedFoodIds: lsGet('deletedFoodIds', []), // hidden base spreadsheet foods, by id
   pairCounts: lsGet('pairCounts', {}),     // co-occurrence counts for "frequently logged together"
@@ -1027,7 +1028,17 @@ function findFood(id) {
 
 function pickFood(food) {
   state.picked = food;
-  state.qty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1; state.qtyRaw = String(state.qty);
+  // priority: 1) user-set default (from edit or initial input) 2) last logged qty 3) unit default
+  var daKey = food.n.toLowerCase() + '::' + food.u;
+  var defaultQty;
+  if (state.defaultAmounts[daKey] != null) {
+    defaultQty = state.defaultAmounts[daKey];
+  } else {
+    var recent = state.recentFoods.find(function(r){ return r.n === food.n && r.u === food.u; });
+    defaultQty = recent ? recent.qty : (UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1);
+  }
+  state.qty = defaultQty;
+  state.qtyRaw = String(defaultQty);
   state.searchFocused = false;
   state.query = '';
 }
@@ -1197,6 +1208,11 @@ function defineCustomFood() {
       lsSet('customFoods', state.customFoods);
     }
   }
+  // save the input amount as this food's permanent default quantity
+  var daKey = name.toLowerCase() + '::' + unit;
+  state.defaultAmounts[daKey] = amount;
+  lsSet('defaultAmounts', state.defaultAmounts);
+
   state.customDraft = { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' };
   state.showCustomForm = false;
   pickFood(food);
@@ -1262,6 +1278,10 @@ function saveEditFood() {
     state.foodEdits[String(id)] = updated;
     lsSet('foodEdits', state.foodEdits);
   }
+  // persist the reference amount as this food's default quantity going forward
+  var daKey = updated.n.toLowerCase() + '::' + updated.u;
+  state.defaultAmounts[daKey] = amount;
+  lsSet('defaultAmounts', state.defaultAmounts);
   state.editingFood = null;
   state.editDraft = null;
   render();
