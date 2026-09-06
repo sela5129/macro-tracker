@@ -455,6 +455,7 @@ var state = {
   customFoods: lsGet('customFoods', []),
   recentFoods: lsGet('recentFoods', []),
   defaultAmounts: lsGet('defaultAmounts', {}), // keyed by "name::unit", set on edit or initial custom entry
+  lastLoggedQty: lsGet('lastLoggedQty', {}),   // keyed by "name::unit", updated every time any food is logged
   foodEdits: lsGet('foodEdits', {}),       // overrides for base spreadsheet foods, keyed by id
   deletedFoodIds: lsGet('deletedFoodIds', []), // hidden base spreadsheet foods, by id
   pairCounts: lsGet('pairCounts', {}),     // co-occurrence counts for "frequently logged together"
@@ -1028,14 +1029,15 @@ function findFood(id) {
 
 function pickFood(food) {
   state.picked = food;
-  // priority: 1) user-set default (from edit or initial input) 2) last logged qty 3) unit default
+  // priority: 1) user-set default (from edit/custom) 2) last logged qty (every food, no cap) 3) unit default
   var daKey = food.n.toLowerCase() + '::' + food.u;
   var defaultQty;
   if (state.defaultAmounts[daKey] != null) {
     defaultQty = state.defaultAmounts[daKey];
+  } else if (state.lastLoggedQty[daKey] != null) {
+    defaultQty = state.lastLoggedQty[daKey];
   } else {
-    var recent = state.recentFoods.find(function(r){ return r.n === food.n && r.u === food.u; });
-    defaultQty = recent ? recent.qty : (UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1);
+    defaultQty = UNIT_DEFAULT[food.u] != null ? UNIT_DEFAULT[food.u] : 1;
   }
   state.qty = defaultQty;
   state.qtyRaw = String(defaultQty);
@@ -1065,6 +1067,11 @@ function confirmAdd() {
   state.recentFoods = nextRecents;
   lsSet('recentFoods', nextRecents);
 
+  // remember last logged qty for every food ever logged (no cap — used as default in picker)
+  var llKey = p.n.toLowerCase() + '::' + p.u;
+  state.lastLoggedQty[llKey] = state.qty;
+  lsSet('lastLoggedQty', state.lastLoggedQty);
+
   state.picked = null;
   state.qty = 0; state.qtyRaw = '0';
   render();
@@ -1091,6 +1098,10 @@ function duplicateEntry(id) {
   var nextRecents = [{ id: 'recent-' + original.n + '-' + original.u, n: original.n, u: original.u, p: original.p, c: original.c, cb: original.cb, f: original.f, qty: original.qty }].concat(filtered).slice(0, 12);
   state.recentFoods = nextRecents;
   lsSet('recentFoods', nextRecents);
+
+  var llKey2 = original.n.toLowerCase() + '::' + original.u;
+  state.lastLoggedQty[llKey2] = original.qty;
+  lsSet('lastLoggedQty', state.lastLoggedQty);
 
   showToast('Repeated "' + original.n + '"');
 }
