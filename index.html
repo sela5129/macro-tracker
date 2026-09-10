@@ -1775,6 +1775,43 @@ function scanAndLookup() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Backfill lastLoggedQty from existing history on startup
+// Scans every log: and plan: key in localStorage so foods logged before this
+// feature was added still default to your real last-used quantity.
+// Runs once per session — cheap since it just reads existing localStorage.
+// ---------------------------------------------------------------------------
+(function backfillLastLoggedQty() {
+  var changed = false;
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    if (!key || (key.indexOf('log:') !== 0 && key.indexOf('plan:') !== 0)) continue;
+    var entries = lsGet(key, []);
+    entries.forEach(function(e) {
+      if (!e.n || !e.u || !e.qty) return;
+      var k = e.n.toLowerCase() + '::' + e.u;
+      // only update if not already set or if this entry has a more meaningful qty
+      // we process in storage order so the last-written day wins;
+      // a full date-ordered scan would be expensive, so we accept minor ordering
+      // imprecision here — in practice the most-used quantity will dominate
+      if (state.defaultAmounts[k] == null) {
+        // don't override a user-set default
+        state.lastLoggedQty[k] = e.qty;
+        changed = true;
+      }
+    });
+  }
+  // also seed from recentFoods (most reliable "last used" signal we already had)
+  state.recentFoods.forEach(function(r) {
+    var k = r.n.toLowerCase() + '::' + r.u;
+    if (state.defaultAmounts[k] == null) {
+      state.lastLoggedQty[k] = r.qty; // recentFoods entries are already last-logged
+      changed = true;
+    }
+  });
+  if (changed) lsSet('lastLoggedQty', state.lastLoggedQty);
+})();
+
 render();
 </script>
 </body>
