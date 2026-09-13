@@ -146,6 +146,50 @@
   .clear-day-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:#9C2B1B; background:none; border:0; text-decoration:underline; cursor:pointer; }
   .copy-day-btn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; color:rgba(0,0,0,0.6); background:none; border:0; text-decoration:underline; cursor:pointer; margin-right:12px; }
   .pull-plan-btn { display:block; width:100%; background:#2F6B45; color:#fff; border:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:11px 16px; cursor:pointer; margin-bottom:10px; text-align:center; }
+  /* Recipes */
+  .recipe-header { display:flex; align-items:center; gap:8px; margin:16px 0 8px; }
+  .recipe-title { font-size:18px; font-weight:900; text-transform:uppercase; flex:1; }
+  .recipe-new-btn { background:#111; color:#fff; border:0; font-size:12px; font-weight:700; text-transform:uppercase; padding:8px 14px; cursor:pointer; flex-shrink:0; }
+  .recipe-back { background:none; border:0; font-size:20px; color:#111; cursor:pointer; padding:0 8px 0 0; }
+  .recipe-edit-btn { background:none; border:1px solid rgba(0,0,0,0.3); font-size:12px; font-weight:700; text-transform:uppercase; padding:6px 12px; cursor:pointer; }
+  .recipe-card { background:#fff; border:1px solid rgba(0,0,0,0.2); padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  .recipe-card:active { background:#f5f5f0; }
+  .rc-name { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .rc-meta { font-size:11px; color:rgba(0,0,0,0.5); margin-bottom:6px; }
+  .rc-macros { display:flex; gap:10px; font-size:12px; font-family:'SF Mono',Menlo,monospace; font-weight:700; align-items:center; }
+  .rc-unit { font-size:10px; color:rgba(0,0,0,0.4); font-weight:400; }
+  .recipe-section-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(0,0,0,0.4); margin:14px 0 6px; }
+  .recipe-ing-row { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid rgba(0,0,0,0.15); padding:10px 12px; margin-bottom:6px; }
+  .ri-info { flex:1; min-width:0; }
+  .ri-name { font-size:14px; font-weight:600; display:block; }
+  .ri-meta { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); }
+  .ri-del { background:none; border:0; font-size:18px; color:rgba(0,0,0,0.4); cursor:pointer; padding:4px 4px 4px 12px; }
+  .recipe-ing-search-wrap { background:#fff; border:2px solid #111; padding:8px; margin-bottom:8px; }
+  .recipe-ing-search-row { display:flex; align-items:center; gap:6px; }
+  .recipe-ing-search-row input { flex:1; border:0; font-size:16px; outline:none; }
+  .recipe-ing-results { border-top:1px solid rgba(0,0,0,0.1); margin-top:6px; }
+  .recipe-ing-result { width:100%; text-align:left; background:none; border:0; padding:9px 8px; font-size:14px; cursor:pointer; display:flex; justify-content:space-between; border-top:1px solid rgba(0,0,0,0.06); }
+  .recipe-ing-result .cal { font-size:11px; font-family:'SF Mono',Menlo,monospace; color:rgba(0,0,0,0.5); }
+  .recipe-add-new-ing { background:none; border:0; color:#2F6B45; font-size:13px; font-weight:700; cursor:pointer; padding:0; text-decoration:underline; }
+  .recipe-ing-qty-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+  .recipe-ing-qty-row .ri-name { font-size:13px; flex:1; }
+  .recipe-ing-qty-row input { width:80px; border:2px solid #111; padding:6px 8px; font-size:18px; font-weight:700; text-align:center; font-family:'SF Mono',Menlo,monospace; }
+  .ri-unit { font-size:13px; color:rgba(0,0,0,0.6); font-weight:600; }
+  .recipe-ing-add-confirm { background:#111; color:#fff; border:0; font-size:12px; font-weight:700; text-transform:uppercase; padding:8px 12px; cursor:pointer; flex-shrink:0; }
+  .recipe-name-input { width:100%; border:2px solid rgba(0,0,0,0.2); padding:10px 12px; font-size:18px; font-weight:700; margin-bottom:4px; box-sizing:border-box; }
+  .recipe-name-input:focus { border-color:#111; outline:none; }
+  .recipe-yield-row { display:flex; align-items:center; gap:10px; }
+  .recipe-yield-row input { width:120px; border:2px solid #111; padding:10px 8px; font-size:22px; font-weight:700; font-family:'SF Mono',Menlo,monospace; text-align:center; }
+  .recipe-yield-hint { font-size:11px; color:rgba(0,0,0,0.4); margin-top:4px; margin-bottom:8px; }
+  .recipe-totals-box { background:#F1EFE6; border:1px solid rgba(0,0,0,0.15); padding:10px 12px; margin-top:4px; }
+  .recipe-totals-row { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:rgba(0,0,0,0.5); margin-bottom:4px; }
+  .recipe-totals-macros { display:flex; gap:16px; font-size:15px; font-family:'SF Mono',Menlo,monospace; font-weight:700; }
+  .recipe-builder-btns { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+  .recipe-delete-btn { background:none; border:1px solid #9C2B1B; color:#9C2B1B; font-size:12px; font-weight:700; text-transform:uppercase; padding:10px; cursor:pointer; }
+  .recipe-log-row { display:flex; align-items:center; gap:10px; }
+  .recipe-log-label { font-size:13px; font-weight:600; flex-shrink:0; }
+  .recipe-log-row input { width:100px; border:2px solid #111; padding:10px 8px; font-size:22px; font-weight:700; font-family:'SF Mono',Menlo,monospace; text-align:center; }
+  .recipe-save-as-food { background:none; border:0; color:rgba(0,0,0,0.5); font-size:12px; text-decoration:underline; cursor:pointer; margin-top:16px; display:block; }
   .copy-day-panel { background:#F1EFE6; border:2px solid #111; padding:12px; margin-bottom:10px; }
   .copy-day-panel .ttl { font-size:12px; font-weight:700; margin-bottom:8px; }
   .copy-day-panel .row { display:flex; gap:8px; margin-bottom:10px; }
@@ -454,12 +498,20 @@ var state = {
   burned: 0,
   customFoods: lsGet('customFoods', []),
   recentFoods: lsGet('recentFoods', []),
-  defaultAmounts: lsGet('defaultAmounts', {}), // keyed by "name::unit", set on edit or initial custom entry
-  lastLoggedQty: lsGet('lastLoggedQty', {}),   // keyed by "name::unit", updated every time any food is logged
-  foodEdits: lsGet('foodEdits', {}),       // overrides for base spreadsheet foods, keyed by id
-  deletedFoodIds: lsGet('deletedFoodIds', []), // hidden base spreadsheet foods, by id
-  pairCounts: lsGet('pairCounts', {}),     // co-occurrence counts for "frequently logged together"
+  defaultAmounts: lsGet('defaultAmounts', {}),
+  lastLoggedQty: lsGet('lastLoggedQty', {}),
+  foodEdits: lsGet('foodEdits', {}),
+  deletedFoodIds: lsGet('deletedFoodIds', []),
+  pairCounts: lsGet('pairCounts', {}),
   goals: lsGet('goals', { protein: '', calories: '' }),
+  recipes: lsGet('recipes', []),       // saved recipes
+  recipeScreen: 'list',                // 'list' | 'builder' | 'detail' | 'log'
+  editingRecipe: null,                 // recipe being built/edited
+  activeRecipeId: null,                // recipe shown in detail
+  recipeIngSearch: '',                 // ingredient search query inside builder
+  recipePickedIngredient: null,        // food selected from search to add to recipe
+  recipeIngQty: '',                    // qty for ingredient being added
+  recipeLogQty: '',                    // qty when logging a recipe portion
   query: '',
   mode: 'search',
   openCats: {},
@@ -471,8 +523,8 @@ var state = {
   saveCustomForFuture: true,
   showGoals: false,
   toast: '',
-  editingFood: null,        // food object currently being edited, or null
-  editDraft: null,          // { n, u, amount, p, c, cb, f } draft while editing — values are TOTALS for `amount` units
+  editingFood: null,
+  editDraft: null,
   selectedForCombine: {},   // entry ids selected to combine into a custom food
   confirmDeleteId: null,
   browseQuery: '',
@@ -663,6 +715,32 @@ function updateSearchResults() {
   }
 }
 
+function updateRecipeIngResults() {
+  var container = document.getElementById('recipe-ing-results-container');
+  if (!container) return;
+  var q = state.recipeIngSearch.trim().toLowerCase();
+  // sync clear button
+  var clearBtn = document.querySelector('[data-action="clearRecipeIngSearch"]');
+  if (state.recipeIngSearch && !clearBtn) {
+    var row = document.querySelector('.recipe-ing-search-row');
+    if (row) { var b = document.createElement('button'); b.className='browse-search-clear'; b.dataset.action='clearRecipeIngSearch'; b.textContent='\u00d7'; row.appendChild(b); }
+  } else if (!state.recipeIngSearch && clearBtn) { clearBtn.remove(); }
+  if (!q) { container.innerHTML = ''; return; }
+  var ires = allFoods().filter(function(f){ return f.n.toLowerCase().indexOf(q) !== -1; }).slice(0, 6);
+  var html = '';
+  if (ires.length) {
+    html += '<div class="recipe-ing-results">';
+    ires.forEach(function(f) {
+      html += '<button class="recipe-ing-result" data-action="recipePickIng" data-id="' + esc(f.id) + '">' +
+        esc(f.n) + '<span class="cal">' + round1(f.c) + 'cal/' + f.u + '</span></button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="recipe-ing-results"><div style="padding:10px 12px;font-size:13px;color:rgba(0,0,0,0.4)">Not found \u2014 <button class="recipe-add-new-ing" data-action="recipeAddNewIngredient">add "' + esc(state.recipeIngSearch) + '" as new food</button></div></div>';
+  }
+  container.innerHTML = html;
+}
+
 function macroRow(label, value, unit, color) {
   return '<div class="macro-row"><span class="lbl">' + label + '</span>' +
     '<span class="val" style="color:' + color + '">' + round1(value) + unit + '</span></div>';
@@ -714,10 +792,21 @@ function render() {
   html += '<div class="wrap">';
   html += '<div class="hdr"><span class="title">Macro Log</span><span>\uD83D\uDD25</span></div>';
 
-  html += '<div class="toggle2">';
+  html += '<div class="toggle3" style="margin-top:0;border-top:0;">';
   html += '<button data-action="setView" data-value="log" class="' + (state.view==='log'?'active':'') + '">Log</button>';
   html += '<button data-action="setView" data-value="plan" class="' + (state.view==='plan'?'active':'') + '">Plan Ahead</button>';
+  html += '<button data-action="setView" data-value="recipes" class="' + (state.view==='recipes'?'active':'') + '">\uD83C\uDF73 Recipes</button>';
   html += '</div>';
+
+  // Recipes tab — render its own UI and early-return
+  if (state.view === 'recipes') {
+    html += buildRecipeSection();
+    html += '</div>';
+    if (state.toast) html += '<div class="toast">' + esc(state.toast) + '</div>';
+    root.innerHTML = html;
+    updateSearchResults();
+    return;
+  }
 
   html += '<div class="datenav">';
   html += '<button data-action="shiftDate" data-value="-1">\u2039</button>';
@@ -1017,6 +1106,7 @@ function render() {
 
   // always populate the search results container after a full render
   updateSearchResults();
+  updateRecipeIngResults();
 }
 
 // ---------------------------------------------------------------------------
@@ -1502,7 +1592,13 @@ root.addEventListener('click', function(e) {
   var action = btn.dataset.action;
   var value = btn.dataset.value;
 
-  if (action === 'setView') { state.view = value; state.picked = null; state.qty = 0; state.qtyRaw = '0'; render(); }
+  if (action === 'setView') {
+    var prev = state.view;
+    state.view = value;
+    state.picked = null; state.qty = 0; state.qtyRaw = '0';
+    if (value !== 'recipes') { state.recipeScreen = 'list'; state.editingRecipe = null; state.activeRecipeId = null; }
+    render();
+  }
   else if (action === 'shiftDate') {
     var delta = Number(value);
     if (state.view === 'log') state.logDate = shiftDate(state.logDate, delta);
@@ -1552,6 +1648,26 @@ root.addEventListener('click', function(e) {
   else if (action === 'clearDay') { clearDay(); }
   else if (action === 'openCopyDay') { openCopyDay(); }
   else if (action === 'pullFromPlan') { pullFromPlan(); }
+  else if (action === 'recipeNew') { recipeNew(); }
+  else if (action === 'recipeOpen') { recipeOpen(btn.dataset.id); }
+  else if (action === 'recipeBack') { recipeBack(); }
+  else if (action === 'recipeEdit') { recipeEdit(btn.dataset.id); }
+  else if (action === 'recipeSave') { recipeSave(); }
+  else if (action === 'recipeDelete') { recipeDelete(); }
+  else if (action === 'recipePickIng') { recipePickIng(btn.dataset.id); }
+  else if (action === 'recipeConfirmIng') { recipeConfirmIng(); }
+  else if (action === 'recipeCancelIng') { state.recipePickedIngredient = null; state.recipeIngQty = ''; render(); }
+  else if (action === 'recipeRemoveIng') { recipeRemoveIng(Number(btn.dataset.idx)); }
+  else if (action === 'clearRecipeIngSearch') {
+    state.recipeIngSearch = '';
+    var ri = document.getElementById('recipe-ing-search');
+    if (ri) { ri.value = ''; ri.focus(); }
+    updateRecipeIngResults();
+  }
+  else if (action === 'recipeAddNewIngredient') { recipeAddNewIngredient(); }
+  else if (action === 'recipeLogPortion') { recipeLogPortion(btn.dataset.id); }
+  else if (action === 'recipeLogPortionPlan') { recipeLogPortionPlan(btn.dataset.id); }
+  else if (action === 'recipeSaveAsFood') { recipeSaveAsFood(btn.dataset.id); }
   else if (action === 'cancelCopyDay') { cancelCopyDay(); }
   else if (action === 'performCopyDay') { performCopyDay(); }
   else if (action === 'toggleSync') { toggleSync(); }
@@ -1637,6 +1753,11 @@ root.addEventListener('input', function(e) {
     state.importText = val;
     render();
   }
+  else if (field === 'recipeEditName') { if (state.editingRecipe) { state.editingRecipe.name = val; var sb = document.querySelector('[data-action="recipeSave"]'); if (sb) sb.disabled = !val.trim() || !state.editingRecipe.ingredients.length || !state.editingRecipe.yieldG; } }
+  else if (field === 'recipeIngSearch') { state.recipeIngSearch = val; updateRecipeIngResults(); }
+  else if (field === 'recipeIngQty') { state.recipeIngQty = val.replace(/\s/g,''); }
+  else if (field === 'recipeYield') { if (state.editingRecipe) { state.editingRecipe.yieldG = val.replace(/\s/g,''); render(); } }
+  else if (field === 'recipeLogQty') { state.recipeLogQty = val.replace(/\s/g,''); render(); }
 });
 
 root.addEventListener('change', function(e) {
@@ -1773,6 +1894,322 @@ function scanAndLookup() {
   openScanner(function(code) {
     lookupBarcode(code);
   });
+}
+
+// ---------------------------------------------------------------------------
+// Recipes
+// ---------------------------------------------------------------------------
+
+function recipePerGram(recipe) {
+  var yg = Number(recipe.yieldG) || 1;
+  var totals = { p:0, c:0, cb:0, f:0 };
+  recipe.ingredients.forEach(function(ing) {
+    totals.p  += ing.p  * ing.qty;
+    totals.c  += ing.c  * ing.qty;
+    totals.cb += ing.cb * ing.qty;
+    totals.f  += ing.f  * ing.qty;
+  });
+  return {
+    p:  totals.p  / yg, c:  totals.c  / yg,
+    cb: totals.cb / yg, f:  totals.f  / yg,
+    totalC: totals.c, totalP: totals.p, totalCb: totals.cb, totalF: totals.f,
+  };
+}
+
+function buildRecipeSection() {
+  var html = '';
+  var rs = state.recipeScreen;
+
+  if (rs === 'list') {
+    html += '<div class="recipe-header"><span class="recipe-title">\uD83C\uDF73 My Recipes</span>' +
+      '<button class="recipe-new-btn" data-action="recipeNew">+ New Recipe</button></div>';
+    if (!state.recipes.length) {
+      html += '<div class="empty-state" style="margin-top:16px">No recipes yet \u2014 tap "+ New Recipe" to build your first one.</div>';
+    } else {
+      state.recipes.forEach(function(r) {
+        var pg = recipePerGram(r);
+        html += '<div class="recipe-card" data-action="recipeOpen" data-id="' + esc(r.id) + '">' +
+          '<div class="rc-name">' + esc(r.name) + '</div>' +
+          '<div class="rc-meta">' + r.ingredients.length + ' ingredient(s) \u00b7 yield: ' + (r.yieldG||'?') + 'g</div>' +
+          '<div class="rc-macros">' +
+            '<span style="color:#2F6B45">' + round1(pg.p) + 'p</span>' +
+            '<span>' + round1(pg.c) + 'cal</span>' +
+            '<span style="color:#B5651D">' + round1(pg.cb) + 'c</span>' +
+            '<span style="color:#9C2B1B">' + round1(pg.f) + 'f</span>' +
+            '<span class="rc-unit">per g</span>' +
+          '</div></div>';
+      });
+    }
+  }
+
+  else if (rs === 'builder') {
+    var er = state.editingRecipe;
+    var pg2 = er.ingredients.length && er.yieldG ? recipePerGram(er) : null;
+    html += '<div class="recipe-header"><button class="recipe-back" data-action="recipeBack">\u2190</button>' +
+      '<span class="recipe-title">' + (er.id ? 'Edit Recipe' : 'New Recipe') + '</span></div>';
+
+    html += '<input id="recipe-name" type="text" class="recipe-name-input" data-field="recipeEditName" value="' + esc(er.name) + '" placeholder="Recipe name\u2026">';
+
+    // Ingredients list
+    html += '<div class="recipe-section-lbl">Ingredients</div>';
+    if (er.ingredients.length) {
+      er.ingredients.forEach(function(ing, idx) {
+        html += '<div class="recipe-ing-row">' +
+          '<div class="ri-info"><span class="ri-name">' + esc(ing.n) + '</span>' +
+          '<span class="ri-meta">' + ing.qty + UNIT_LABEL[ing.u] + ' \u00b7 ' + round1(ing.c * ing.qty) + 'cal \u00b7 P' + round1(ing.p * ing.qty) + '</span></div>' +
+          '<button class="ri-del" data-action="recipeRemoveIng" data-idx="' + idx + '">\u00d7</button></div>';
+      });
+    }
+
+    // Add ingredient search
+    html += '<div class="recipe-ing-search-wrap">';
+    if (!state.recipePickedIngredient) {
+      html += '<div class="recipe-ing-search-row">' +
+        '<input id="recipe-ing-search" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="recipeIngSearch" placeholder="Search ingredient\u2026" value="' + esc(state.recipeIngSearch) + '">' +
+        (state.recipeIngSearch ? '<button class="browse-search-clear" data-action="clearRecipeIngSearch">\u00d7</button>' : '') +
+        '</div>' +
+        '<div id="recipe-ing-results-container"></div>';  // filled by updateRecipeIngResults() — never rebuilt during typing
+    } else {
+      var pi = state.recipePickedIngredient;
+      html += '<div class="recipe-ing-qty-row">' +
+        '<span class="ri-name">' + esc(pi.n) + '</span>' +
+        '<input id="recipe-ing-qty" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="recipeIngQty" value="' + esc(state.recipeIngQty) + '" placeholder="qty">' +
+        '<span class="ri-unit">' + UNIT_LABEL[pi.u] + '</span>' +
+        '<button class="recipe-ing-add-confirm" data-action="recipeConfirmIng">Add</button>' +
+        '<button class="browse-search-clear" data-action="recipeCancelIng">\u00d7</button>' +
+        '</div>';
+    }
+    html += '</div>';
+
+    // Total yield
+    html += '<div class="recipe-section-lbl">Total cooked weight (grams)</div>';
+    html += '<div class="recipe-yield-row">' +
+      '<input id="recipe-yield" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="recipeYield" value="' + esc(er.yieldG) + '" placeholder="e.g. 850">' +
+      '<span class="ri-unit">g</span></div>';
+    html += '<div class="recipe-yield-hint">Weigh the entire finished meal. That total is the yield.</div>';
+
+    // Live totals
+    if (er.ingredients.length) {
+      var totP=0,totC=0,totCb=0,totF=0;
+      er.ingredients.forEach(function(ing){ totP+=ing.p*ing.qty; totC+=ing.c*ing.qty; totCb+=ing.cb*ing.qty; totF+=ing.f*ing.qty; });
+      html += '<div class="recipe-totals-box">';
+      html += '<div class="recipe-totals-row"><span>Total raw macros</span></div>';
+      html += '<div class="recipe-totals-macros">' +
+        '<span style="color:#2F6B45">' + round1(totP) + 'p</span>' +
+        '<span>' + round1(totC) + 'cal</span>' +
+        '<span style="color:#B5651D">' + round1(totCb) + 'c</span>' +
+        '<span style="color:#9C2B1B">' + round1(totF) + 'f</span></div>';
+      if (pg2) {
+        html += '<div class="recipe-totals-row" style="margin-top:6px"><span>Per gram of finished meal</span></div>';
+        html += '<div class="recipe-totals-macros">' +
+          '<span style="color:#2F6B45">' + round1(pg2.p) + 'p</span>' +
+          '<span>' + round1(pg2.c) + 'cal</span>' +
+          '<span style="color:#B5651D">' + round1(pg2.cb) + 'c</span>' +
+          '<span style="color:#9C2B1B">' + round1(pg2.f) + 'f</span></div>';
+      }
+      html += '</div>';
+    }
+
+    html += '<div class="recipe-builder-btns">';
+    if (er.id) html += '<button class="recipe-delete-btn" data-action="recipeDelete">Delete Recipe</button>';
+    html += '<button class="big-btn" data-action="recipeSave" ' + (!er.name.trim() || !er.ingredients.length || !er.yieldG ? 'disabled' : '') + '>Save Recipe</button>';
+    html += '</div>';
+  }
+
+  else if (rs === 'detail') {
+    var recipe = state.recipes.find(function(r){ return r.id === state.activeRecipeId; });
+    if (!recipe) { return '<div class="empty-state">Recipe not found.</div>'; }
+    var pg3 = recipePerGram(recipe);
+    html += '<div class="recipe-header"><button class="recipe-back" data-action="recipeBack">\u2190</button>' +
+      '<span class="recipe-title">' + esc(recipe.name) + '</span>' +
+      '<button class="recipe-edit-btn" data-action="recipeEdit" data-id="' + esc(recipe.id) + '">\u270e Edit</button></div>';
+
+    html += '<div class="recipe-section-lbl">Ingredients</div>';
+    recipe.ingredients.forEach(function(ing) {
+      html += '<div class="recipe-ing-row">' +
+        '<div class="ri-info"><span class="ri-name">' + esc(ing.n) + '</span>' +
+        '<span class="ri-meta">' + ing.qty + UNIT_LABEL[ing.u] + ' \u00b7 ' + round1(ing.c*ing.qty) + 'cal \u00b7 P' + round1(ing.p*ing.qty) + '</span></div></div>';
+    });
+
+    html += '<div class="recipe-section-lbl">Yield: ' + recipe.yieldG + 'g total</div>';
+    html += '<div class="recipe-totals-box">';
+    html += '<div class="recipe-totals-row"><span>Per gram of finished meal</span></div>';
+    html += '<div class="recipe-totals-macros">' +
+      '<span style="color:#2F6B45">' + round1(pg3.p) + 'p</span>' +
+      '<span>' + round1(pg3.c) + 'cal</span>' +
+      '<span style="color:#B5651D">' + round1(pg3.cb) + 'c</span>' +
+      '<span style="color:#9C2B1B">' + round1(pg3.f) + 'f</span></div>';
+    html += '</div>';
+
+    // Log portion section
+    html += '<div class="recipe-section-lbl">Log a portion</div>';
+    html += '<div class="recipe-log-row">' +
+      '<span class="recipe-log-label">I\u2019m eating</span>' +
+      '<input id="recipe-log-qty" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="recipeLogQty" value="' + esc(state.recipeLogQty) + '" placeholder="0">' +
+      '<span class="ri-unit">g</span></div>';
+
+    if (state.recipeLogQty && Number(state.recipeLogQty) > 0) {
+      var portionG = Number(state.recipeLogQty);
+      var portionC = pg3.c * portionG, portionP = pg3.p * portionG, portionCb = pg3.cb * portionG, portionF = pg3.f * portionG;
+      html += '<div class="recipe-totals-box" style="margin-top:8px">';
+      html += '<div class="recipe-totals-macros" style="font-size:17px">' +
+        '<span style="color:#2F6B45">' + round1(portionP) + 'p</span>' +
+        '<span>' + round1(portionC) + 'cal</span>' +
+        '<span style="color:#B5651D">' + round1(portionCb) + 'c</span>' +
+        '<span style="color:#9C2B1B">' + round1(portionF) + 'f</span></div>';
+      html += '</div>';
+      html += '<button class="big-btn" data-action="recipeLogPortion" style="margin-top:12px" data-id="' + esc(recipe.id) + '">Add ' + portionG + 'g of ' + esc(recipe.name) + ' to Log</button>';
+      html += '<button class="big-btn" data-action="recipeLogPortionPlan" style="margin-top:8px;background:#F1EFE6;color:#111;border:1px solid #ccc" data-id="' + esc(recipe.id) + '">Add to Plan Ahead</button>';
+    }
+
+    html += '<button class="recipe-save-as-food" data-action="recipeSaveAsFood" data-id="' + esc(recipe.id) + '">Save as food in database (per gram)</button>';
+  }
+
+  return html;
+}
+
+// Recipe action handlers
+function recipeNew() {
+  state.recipeScreen = 'builder';
+  state.editingRecipe = { id: null, name: '', ingredients: [], yieldG: '' };
+  state.recipeIngSearch = ''; state.recipePickedIngredient = null; state.recipeIngQty = '';
+  render();
+}
+
+function recipeEdit(id) {
+  var r = state.recipes.find(function(x){ return x.id === id; });
+  if (!r) return;
+  state.recipeScreen = 'builder';
+  state.editingRecipe = JSON.parse(JSON.stringify(r)); // deep copy
+  state.recipeIngSearch = ''; state.recipePickedIngredient = null; state.recipeIngQty = '';
+  render();
+}
+
+function recipeOpen(id) {
+  state.activeRecipeId = id;
+  state.recipeScreen = 'detail';
+  state.recipeLogQty = '';
+  render();
+}
+
+function recipeBack() {
+  if (state.recipeScreen === 'builder' || state.recipeScreen === 'detail') {
+    state.recipeScreen = 'list';
+    state.editingRecipe = null; state.activeRecipeId = null;
+  }
+  render();
+}
+
+function recipeSave() {
+  var er = state.editingRecipe;
+  if (!er || !er.name.trim() || !er.ingredients.length || !er.yieldG) return;
+  if (!er.id) er.id = 'recipe-' + Date.now();
+  var idx = state.recipes.findIndex(function(r){ return r.id === er.id; });
+  if (idx >= 0) state.recipes[idx] = er;
+  else state.recipes.push(er);
+  lsSet('recipes', state.recipes);
+  state.activeRecipeId = er.id;
+  state.recipeScreen = 'detail';
+  state.editingRecipe = null;
+  state.recipeIngSearch = ''; state.recipePickedIngredient = null; state.recipeIngQty = '';
+  showToast('\u2713 Recipe saved');
+  render();
+}
+
+function recipeDelete() {
+  var er = state.editingRecipe;
+  if (!er || !er.id) return;
+  if (!window.confirm('Delete "' + er.name + '"? This can\'t be undone.')) return;
+  state.recipes = state.recipes.filter(function(r){ return r.id !== er.id; });
+  lsSet('recipes', state.recipes);
+  state.recipeScreen = 'list';
+  state.editingRecipe = null;
+  render();
+}
+
+function recipePickIng(id) {
+  var food = allFoods().find(function(f){ return String(f.id) === String(id); });
+  if (!food) return;
+  state.recipePickedIngredient = food;
+  var daKey = food.n.toLowerCase() + '::' + food.u;
+  state.recipeIngQty = String(state.defaultAmounts[daKey] || state.lastLoggedQty[daKey] || UNIT_DEFAULT[food.u] || 1);
+  state.recipeIngSearch = '';
+  render();
+  setTimeout(function(){ var el = document.getElementById('recipe-ing-qty'); if (el) { el.focus(); el.select(); } }, 80);
+}
+
+function recipeConfirmIng() {
+  var food = state.recipePickedIngredient;
+  var qty = Number(state.recipeIngQty) || 0;
+  if (!food || qty <= 0) return;
+  state.editingRecipe.ingredients.push({ n: food.n, u: food.u, qty: qty, p: food.p, c: food.c, cb: food.cb, f: food.f });
+  state.recipePickedIngredient = null;
+  state.recipeIngQty = '';
+  state.recipeIngSearch = '';
+  render();
+}
+
+function recipeAddNewIngredient() {
+  // pre-fill custom form with the searched name and switch to custom tab
+  state.customDraft = { n: state.recipeIngSearch, amount: '', unit: 'g', p: '', c: '', cb: '', f: '' };
+  state._pendingRecipeIng = true; // flag: after save, add to recipe
+  state.view = 'log'; // switch to log so custom form shows
+  state.showCustomForm = true;
+  render();
+  showToast('Fill in the nutrition, then it\u2019ll be added to your recipe');
+}
+
+function recipeRemoveIng(idx) {
+  state.editingRecipe.ingredients.splice(idx, 1);
+  render();
+}
+
+function recipeLogPortion(id) {
+  var recipe = state.recipes.find(function(r){ return r.id === id; });
+  if (!recipe) return;
+  var qty = Number(state.recipeLogQty);
+  if (!qty || qty <= 0) return;
+  var pg = recipePerGram(recipe);
+  var entry = { id: Date.now() + Math.random(), n: recipe.name, u: 'g', p: pg.p, c: pg.c, cb: pg.cb, f: pg.f, qty: qty };
+  var logKey = 'log:' + todayStr();
+  var entries = lsGet(logKey, []);
+  entries.push(entry);
+  lsSet(logKey, entries);
+  state.lastLoggedQty[recipe.name.toLowerCase() + '::g'] = qty;
+  lsSet('lastLoggedQty', state.lastLoggedQty);
+  state.recipeLogQty = '';
+  state.view = 'log'; state.logDate = todayStr();
+  showToast('\u2713 Added ' + qty + 'g of ' + recipe.name + ' to today\u2019s log');
+  render();
+}
+
+function recipeLogPortionPlan(id) {
+  var recipe = state.recipes.find(function(r){ return r.id === id; });
+  if (!recipe) return;
+  var qty = Number(state.recipeLogQty);
+  if (!qty || qty <= 0) return;
+  var pg = recipePerGram(recipe);
+  var entry = { id: Date.now() + Math.random(), n: recipe.name, u: 'g', p: pg.p, c: pg.c, cb: pg.cb, f: pg.f, qty: qty };
+  var planKey = 'plan:' + state.planDate;
+  var entries = lsGet(planKey, []);
+  entries.push(entry);
+  lsSet(planKey, entries);
+  state.recipeLogQty = '';
+  showToast('\u2713 Added ' + qty + 'g of ' + recipe.name + ' to plan for ' + prettyDate(state.planDate));
+  render();
+}
+
+function recipeSaveAsFood(id) {
+  var recipe = state.recipes.find(function(r){ return r.id === id; });
+  if (!recipe) return;
+  var pg = recipePerGram(recipe);
+  var food = { id: 'custom-' + Date.now(), n: recipe.name, u: 'g', p: pg.p, c: pg.c, cb: pg.cb, f: pg.f };
+  var already = state.customFoods.some(function(cf){ return cf.n.toLowerCase() === recipe.name.toLowerCase(); });
+  if (already) { showToast(recipe.name + ' is already in your food database'); return; }
+  state.customFoods = state.customFoods.concat([food]);
+  lsSet('customFoods', state.customFoods);
+  showToast('\u2713 Added "' + recipe.name + '" to your foods (per gram)');
+  render();
 }
 
 // ---------------------------------------------------------------------------
