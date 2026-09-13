@@ -1756,7 +1756,38 @@ root.addEventListener('input', function(e) {
   else if (field === 'recipeEditName') { if (state.editingRecipe) { state.editingRecipe.name = val; var sb = document.querySelector('[data-action="recipeSave"]'); if (sb) sb.disabled = !val.trim() || !state.editingRecipe.ingredients.length || !state.editingRecipe.yieldG; } }
   else if (field === 'recipeIngSearch') { state.recipeIngSearch = val; updateRecipeIngResults(); }
   else if (field === 'recipeIngQty') { state.recipeIngQty = val.replace(/\s/g,''); }
-  else if (field === 'recipeYield') { if (state.editingRecipe) { state.editingRecipe.yieldG = val.replace(/\s/g,''); render(); } }
+  else if (field === 'recipeYield') {
+    if (state.editingRecipe) {
+      state.editingRecipe.yieldG = val.replace(/\s/g, '');
+      // patch only the totals box and save button — don't rebuild the whole DOM
+      // so the keyboard stays attached to the yield input
+      var er = state.editingRecipe;
+      var hasPg = er.ingredients.length > 0 && !!er.yieldG;
+      var pg = hasPg ? recipePerGram(er) : null;
+      // update totals box
+      var box = document.querySelector('.recipe-totals-box');
+      if (box && pg) {
+        var totP=0,totC=0,totCb=0,totF=0;
+        er.ingredients.forEach(function(i){ totP+=i.p*i.qty; totC+=i.c*i.qty; totCb+=i.cb*i.qty; totF+=i.f*i.qty; });
+        box.innerHTML =
+          '<div class="recipe-totals-row"><span>Total raw macros</span></div>' +
+          '<div class="recipe-totals-macros">' +
+            '<span style="color:#2F6B45">'+round1(totP)+'p</span>' +
+            '<span>'+round1(totC)+'cal</span>' +
+            '<span style="color:#B5651D">'+round1(totCb)+'c</span>' +
+            '<span style="color:#9C2B1B">'+round1(totF)+'f</span></div>' +
+          '<div class="recipe-totals-row" style="margin-top:6px"><span>Per gram of finished meal</span></div>' +
+          '<div class="recipe-totals-macros">' +
+            '<span style="color:#2F6B45">'+round1(pg.p)+'p</span>' +
+            '<span>'+round1(pg.c)+'cal</span>' +
+            '<span style="color:#B5651D">'+round1(pg.cb)+'c</span>' +
+            '<span style="color:#9C2B1B">'+round1(pg.f)+'f</span></div>';
+      }
+      // update save button
+      var saveBtn = document.querySelector('[data-action="recipeSave"]');
+      if (saveBtn) saveBtn.disabled = !er.name.trim() || !er.ingredients.length || !er.yieldG;
+    }
+  }
   else if (field === 'recipeLogQty') { state.recipeLogQty = val.replace(/\s/g,''); render(); }
 });
 
@@ -2135,7 +2166,9 @@ function recipePickIng(id) {
   state.recipeIngQty = String(state.defaultAmounts[daKey] || state.lastLoggedQty[daKey] || UNIT_DEFAULT[food.u] || 1);
   state.recipeIngSearch = '';
   render();
-  setTimeout(function(){ var el = document.getElementById('recipe-ing-qty'); if (el) { el.focus(); el.select(); } }, 80);
+  // focus synchronously — still within the user-tap call stack so iOS shows the keyboard
+  var el = document.getElementById('recipe-ing-qty');
+  if (el) { el.focus(); el.select(); }
 }
 
 function recipeConfirmIng() {
