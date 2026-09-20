@@ -1788,7 +1788,29 @@ root.addEventListener('input', function(e) {
       if (saveBtn) saveBtn.disabled = !er.name.trim() || !er.ingredients.length || !er.yieldG;
     }
   }
-  else if (field === 'recipeLogQty') { state.recipeLogQty = val.replace(/\s/g,''); render(); }
+  else if (field === 'recipeLogQty') {
+    state.recipeLogQty = val.replace(/\s/g, '');
+    var portionG = Number(state.recipeLogQty);
+    var recipe = state.recipes.find(function(r){ return r.id === state.activeRecipeId; });
+    // update the portion macros preview and log buttons without rebuilding the input
+    var previewWrap = document.getElementById('recipe-portion-preview');
+    if (previewWrap && recipe) {
+      var pg = recipePerGram(recipe);
+      var html = '';
+      if (portionG > 0) {
+        html += '<div class="recipe-totals-box" style="margin-top:8px">' +
+          '<div class="recipe-totals-macros" style="font-size:17px">' +
+            '<span style="color:#2F6B45">'+round1(pg.p*portionG)+'p</span>' +
+            '<span>'+round1(pg.c*portionG)+'cal</span>' +
+            '<span style="color:#B5651D">'+round1(pg.cb*portionG)+'c</span>' +
+            '<span style="color:#9C2B1B">'+round1(pg.f*portionG)+'f</span>' +
+          '</div></div>' +
+          '<button class="big-btn" data-action="recipeLogPortion" style="margin-top:12px" data-id="'+esc(recipe.id)+'">Add '+portionG+'g of '+esc(recipe.name)+' to Log</button>' +
+          '<button class="big-btn" data-action="recipeLogPortionPlan" style="margin-top:8px;background:#F1EFE6;color:#111;border:1px solid #ccc" data-id="'+esc(recipe.id)+'">Add to Plan Ahead</button>';
+      }
+      previewWrap.innerHTML = html;
+    }
+  }
 });
 
 root.addEventListener('change', function(e) {
@@ -2079,19 +2101,20 @@ function buildRecipeSection() {
       '<input id="recipe-log-qty" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="recipeLogQty" value="' + esc(state.recipeLogQty) + '" placeholder="0">' +
       '<span class="ri-unit">g</span></div>';
 
+    // stable container — filled by recipeLogQty handler without rebuilding the input
+    html += '<div id="recipe-portion-preview">';
     if (state.recipeLogQty && Number(state.recipeLogQty) > 0) {
       var portionG = Number(state.recipeLogQty);
-      var portionC = pg3.c * portionG, portionP = pg3.p * portionG, portionCb = pg3.cb * portionG, portionF = pg3.f * portionG;
-      html += '<div class="recipe-totals-box" style="margin-top:8px">';
-      html += '<div class="recipe-totals-macros" style="font-size:17px">' +
-        '<span style="color:#2F6B45">' + round1(portionP) + 'p</span>' +
-        '<span>' + round1(portionC) + 'cal</span>' +
-        '<span style="color:#B5651D">' + round1(portionCb) + 'c</span>' +
-        '<span style="color:#9C2B1B">' + round1(portionF) + 'f</span></div>';
-      html += '</div>';
-      html += '<button class="big-btn" data-action="recipeLogPortion" style="margin-top:12px" data-id="' + esc(recipe.id) + '">Add ' + portionG + 'g of ' + esc(recipe.name) + ' to Log</button>';
-      html += '<button class="big-btn" data-action="recipeLogPortionPlan" style="margin-top:8px;background:#F1EFE6;color:#111;border:1px solid #ccc" data-id="' + esc(recipe.id) + '">Add to Plan Ahead</button>';
+      html += '<div class="recipe-totals-box" style="margin-top:8px">' +
+        '<div class="recipe-totals-macros" style="font-size:17px">' +
+        '<span style="color:#2F6B45">' + round1(pg3.p*portionG) + 'p</span>' +
+        '<span>' + round1(pg3.c*portionG) + 'cal</span>' +
+        '<span style="color:#B5651D">' + round1(pg3.cb*portionG) + 'c</span>' +
+        '<span style="color:#9C2B1B">' + round1(pg3.f*portionG) + 'f</span></div></div>' +
+        '<button class="big-btn" data-action="recipeLogPortion" style="margin-top:12px" data-id="' + esc(recipe.id) + '">Add ' + portionG + 'g of ' + esc(recipe.name) + ' to Log</button>' +
+        '<button class="big-btn" data-action="recipeLogPortionPlan" style="margin-top:8px;background:#F1EFE6;color:#111;border:1px solid #ccc" data-id="' + esc(recipe.id) + '">Add to Plan Ahead</button>';
     }
+    html += '</div>';
 
     html += '<button class="recipe-save-as-food" data-action="recipeSaveAsFood" data-id="' + esc(recipe.id) + '">Save as food in database (per gram)</button>';
   }
