@@ -226,6 +226,34 @@
   .sync-btn.primary { background:#111; color:#fff; border-color:#111; }
   #import-box, #export-box { width:100%; height:90px; font-family:'SF Mono',Menlo,monospace; font-size:11px; border:2px solid rgba(0,0,0,0.2); padding:8px; margin-bottom:8px; resize:vertical; }
   .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#111; color:#fff; font-size:14px; padding:10px 18px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
+  /* Nav tabs */
+  .toggle4-nav .nav-tab { padding:10px 2px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; background:#fff; color:#111; border:0; cursor:pointer; }
+  .toggle4-nav .nav-tab.active { background:#111; color:#fff; }
+  .toggle4-nav .nav-tab:not(:first-child) { border-left:2px solid #111; }
+  /* Progress section */
+  .progress-section { margin-top:0; }
+  .progress-card { background:#fff; border:4px solid #111; border-top:0; padding:16px; margin-bottom:0; }
+  .progress-card + .progress-card { border-top:0; }
+  .progress-hdr { font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; border-bottom:3px solid #111; padding-bottom:6px; margin-bottom:12px; }
+  .streak-row { display:flex; align-items:center; gap:16px; }
+  .streak-num { font-size:52px; font-weight:900; font-family:'SF Mono',Menlo,monospace; line-height:1; }
+  .streak-label { font-size:13px; font-weight:700; text-transform:uppercase; color:rgba(0,0,0,0.5); }
+  .weight-log-row { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .weight-log-row input { width:110px; border:2px solid #111; padding:10px 8px; font-size:24px; font-weight:700; font-family:'SF Mono',Menlo,monospace; text-align:center; }
+  .weight-log-row .unit-lbl { font-size:14px; font-weight:600; color:rgba(0,0,0,0.6); }
+  .weight-log-btn { background:#111; color:#fff; border:0; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; padding:10px 16px; cursor:pointer; }
+  .weight-history { margin-top:10px; }
+  .weight-history-row { display:flex; justify-content:space-between; font-size:12px; font-family:'SF Mono',Menlo,monospace; padding:4px 0; border-top:1px solid rgba(0,0,0,0.08); }
+  .weight-history-row .wdate { color:rgba(0,0,0,0.5); }
+  .weight-chart { margin-top:8px; width:100%; overflow:hidden; }
+  .weekly-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .weekly-stat { background:#F1EFE6; padding:10px 12px; }
+  .weekly-stat .wval { font-size:26px; font-weight:900; font-family:'SF Mono',Menlo,monospace; line-height:1.1; }
+  .weekly-stat .wlbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:rgba(0,0,0,0.5); margin-top:2px; }
+  .budget-row { display:flex; align-items:baseline; justify-content:space-between; margin-top:8px; padding:8px 0; border-top:1px solid rgba(0,0,0,0.12); }
+  .budget-row .blbl { font-size:12px; font-weight:700; text-transform:uppercase; color:rgba(0,0,0,0.5); }
+  .budget-remaining { font-size:22px; font-weight:900; font-family:'SF Mono',Menlo,monospace; color:#2F6B45; }
+  .budget-over { font-size:22px; font-weight:900; font-family:'SF Mono',Menlo,monospace; color:#9C2B1B; }
   .hidden { display:none !important; }
   /* prevent iOS Safari from auto-zooming when any input/select is focused */
   input, select, textarea { font-size: max(16px, 1em); }
@@ -504,6 +532,7 @@ var state = {
   deletedFoodIds: lsGet('deletedFoodIds', []),
   pairCounts: lsGet('pairCounts', {}),
   goals: lsGet('goals', { protein: '', calories: '' }),
+  weightLog: lsGet('weightLog', {}),     // { 'YYYY-MM-DD': lbs }
   recipes: lsGet('recipes', []),       // saved recipes
   recipeScreen: 'list',                // 'list' | 'builder' | 'detail' | 'log'
   editingRecipe: null,                 // recipe being built/edited
@@ -792,10 +821,11 @@ function render() {
   html += '<div class="wrap">';
   html += '<div class="hdr"><span class="title">Macro Log</span><span>\uD83D\uDD25</span></div>';
 
-  html += '<div class="toggle3" style="margin-top:0;border-top:0;">';
-  html += '<button data-action="setView" data-value="log" class="' + (state.view==='log'?'active':'') + '">Log</button>';
-  html += '<button data-action="setView" data-value="plan" class="' + (state.view==='plan'?'active':'') + '">Plan Ahead</button>';
-  html += '<button data-action="setView" data-value="recipes" class="' + (state.view==='recipes'?'active':'') + '">\uD83C\uDF73 Recipes</button>';
+  html += '<div class="toggle4-nav" style="margin-top:0;border-top:0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:2px solid #111;">';
+  html += '<button data-action="setView" data-value="log" class="nav-tab ' + (state.view==='log'?'active':'') + '">Log</button>';
+  html += '<button data-action="setView" data-value="plan" class="nav-tab ' + (state.view==='plan'?'active':'') + '">Plan</button>';
+  html += '<button data-action="setView" data-value="recipes" class="nav-tab ' + (state.view==='recipes'?'active':'') + '">\uD83C\uDF73 Recipes</button>';
+  html += '<button data-action="setView" data-value="progress" class="nav-tab ' + (state.view==='progress'?'active':'') + '">\uD83D\uDCC8 Progress</button>';
   html += '</div>';
 
   // Recipes tab — render its own UI and early-return
@@ -805,6 +835,15 @@ function render() {
     if (state.toast) html += '<div class="toast">' + esc(state.toast) + '</div>';
     root.innerHTML = html;
     updateSearchResults();
+    return;
+  }
+
+  // Progress tab — render its own UI and early-return
+  if (state.view === 'progress') {
+    html += buildProgressSection();
+    html += '</div>';
+    if (state.toast) html += '<div class="toast">' + esc(state.toast) + '</div>';
+    root.innerHTML = html;
     return;
   }
 
@@ -826,6 +865,19 @@ function render() {
   }
   html += '<div class="cal-row"><span class="lbl">Calories</span><span class="val">' + Math.round(totals.c) +
           (calorieGoal > 0 ? '<span class="goal"> /' + calorieGoal + '</span>' : '') + '</span></div>';
+  // Calorie budget remaining line
+  if (calorieGoal > 0 && state.view === 'log') {
+    var remaining = calorieGoal - Math.round(totals.c);
+    var netCals = Math.round(totals.c) - getBurned() / 2;
+    if (remaining >= 0) {
+      html += '<div class="budget-row"><span class="blbl">Remaining</span><span class="budget-remaining">'+remaining+' cal left</span></div>';
+    } else {
+      html += '<div class="budget-row"><span class="blbl">Over budget</span><span class="budget-over">'+Math.abs(remaining)+' cal over</span></div>';
+    }
+    if (getBurned() > 0) {
+      html += '<div style="font-size:10px;font-family:\'SF Mono\',Menlo,monospace;color:rgba(0,0,0,0.4);margin-top:-4px;padding-bottom:4px;border-bottom:1px solid rgba(0,0,0,0.08)">+'+Math.round(getBurned()/2)+' cal credited from '+getBurned()+' burned</div>';
+    }
+  }
   html += macroRow('Protein', totals.p, 'g', '#2F6B45');
   if (proteinGoal > 0) {
     var pct = Math.min(100, (totals.p / proteinGoal) * 100);
@@ -1689,6 +1741,7 @@ root.addEventListener('click', function(e) {
   else if (action === 'deleteFood') { startDeleteFood(btn.dataset.id); }
   else if (action === 'cancelDeleteFood') { cancelDeleteFood(); }
   else if (action === 'confirmDeleteFood') { confirmDeleteFood(btn.dataset.id); }
+  else if (action === 'logWeight') { logWeight(); }
 });
 
 root.addEventListener('input', function(e) {
@@ -1787,6 +1840,10 @@ root.addEventListener('input', function(e) {
       var saveBtn = document.querySelector('[data-action="recipeSave"]');
       if (saveBtn) saveBtn.disabled = !er.name.trim() || !er.ingredients.length || !er.yieldG;
     }
+  }
+  else if (field === 'weightInput') {
+    state.weightInput = val;
+    // no render needed — just update state
   }
   else if (field === 'recipeLogQty') {
     state.recipeLogQty = val.replace(/\s/g, '');
@@ -2266,6 +2323,185 @@ function recipeSaveAsFood(id) {
   lsSet('customFoods', state.customFoods);
   showToast('\u2713 Added "' + recipe.name + '" to your foods (per gram)');
   render();
+}
+
+
+// ---------------------------------------------------------------------------
+// Progress tab
+// ---------------------------------------------------------------------------
+function calcStreak() {
+  var streak = 0;
+  var d = new Date();
+  // check today first; if no log for today, start checking yesterday
+  for (var i = 0; i < 365; i++) {
+    var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var entries = lsGet('log:' + ds, []);
+    if (entries.length === 0) {
+      if (i === 0) { d.setDate(d.getDate()-1); continue; } // skip today if empty, start from yesterday
+      break;
+    }
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function calcWeeklySummary() {
+  var totalCals = 0, totalProtein = 0, proteinGoal = Number(state.goals.protein)||0;
+  var daysLogged = 0, proteinHits = 0, totalWeight = 0, weightDays = 0;
+  var cg = Number(state.goals.calories)||0;
+  for (var i = 0; i < 7; i++) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var entries = lsGet('log:' + ds, []);
+    if (entries.length > 0) {
+      var dayCals = 0, dayProt = 0;
+      entries.forEach(function(e){ dayCals += (e.c||0)*e.qty; dayProt += (e.p||0)*e.qty; });
+      totalCals += dayCals; totalProtein += dayProt; daysLogged++;
+      if (proteinGoal > 0 && dayProt >= proteinGoal) proteinHits++;
+    }
+    if (state.weightLog[ds] != null) { totalWeight += Number(state.weightLog[ds]); weightDays++; }
+  }
+  return {
+    avgCals: daysLogged > 0 ? Math.round(totalCals / daysLogged) : null,
+    avgProtein: daysLogged > 0 ? Math.round(totalProtein / daysLogged) : null,
+    daysLogged: daysLogged,
+    proteinHitRate: proteinGoal > 0 ? proteinHits : null,
+    avgWeight: weightDays > 0 ? round1(totalWeight / weightDays) : null,
+  };
+}
+
+function logWeight() {
+  var raw = (state.weightInput || '').toString().trim();
+  var val = Number(raw);
+  if (!val || val <= 0) return;
+  var today = todayStr();
+  state.weightLog[today] = val;
+  lsSet('weightLog', state.weightLog);
+  state.weightInput = '';
+  showToast('Weight logged: ' + val + ' lbs');
+  render();
+}
+
+function buildProgressSection() {
+  var html = '';
+  var streak = calcStreak();
+  var weekly = calcWeeklySummary();
+  var today = todayStr();
+
+  // --- Weight log card ---
+  html += '<div class="progress-card">';
+  html += '<div class="progress-hdr">⚖️ Weight Log</div>';
+  html += '<div class="weight-log-row">';
+  html += '<input id="weight-input" type="number" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="0.0" data-field="weightInput" value="' + esc(state.weightInput || '') + '">';
+  html += '<span class="unit-lbl">lbs</span>';
+  html += '<button class="weight-log-btn" data-action="logWeight">Log</button>';
+  html += '</div>';
+  if (state.weightLog[today] != null) {
+    html += '<div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;margin-bottom:8px;font-family:monospace">Today: ' + state.weightLog[today] + ' lbs logged</div>';
+  }
+
+  // SVG chart
+  var days30 = [];
+  for (var i = 29; i >= 0; i--) {
+    var d = new Date(); d.setDate(d.getDate() - i);
+    var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (state.weightLog[ds] != null) days30.push({ ds: ds, w: Number(state.weightLog[ds]) });
+    else days30.push({ ds: ds, w: null });
+  }
+  var haveData = days30.some(function(d){ return d.w !== null; });
+  if (haveData) {
+    var validWeights = days30.filter(function(d){ return d.w !== null; }).map(function(d){ return d.w; });
+    var minW = Math.min.apply(null, validWeights);
+    var maxW = Math.max.apply(null, validWeights);
+    var pad = Math.max((maxW - minW) * 0.15, 2);
+    var lo = minW - pad, hi = maxW + pad;
+    var svgW = 440, svgH = 120;
+    var toY = function(w) { return svgH - 8 - ((w - lo) / (hi - lo)) * (svgH - 20); };
+    var toX = function(i) { return 8 + i * (svgW - 16) / 29; };
+    html += '<div class="weight-chart"><svg viewBox="0 0 ' + svgW + ' ' + svgH + '" style="width:100%;display:block">';
+    // draw light grid lines
+    var steps = 3;
+    for (var s = 0; s <= steps; s++) {
+      var gw = lo + (hi-lo)*s/steps;
+      var gy = toY(gw);
+      html += '<line x1="8" y1="'+gy+'" x2="'+(svgW-8)+'" y2="'+gy+'" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>';
+      html += '<text x="'+(svgW-4)+'" y="'+(gy+4)+'" font-size="8" fill="rgba(0,0,0,0.3)" text-anchor="end">'+round1(gw)+'</text>';
+    }
+    // raw data points and line
+    var pointsArr = [];
+    for (var pi = 0; pi < 30; pi++) {
+      if (days30[pi].w !== null) pointsArr.push(toX(pi) + ',' + toY(days30[pi].w));
+    }
+    // thin dot + line for actual weight
+    var prevX = null, prevY = null;
+    for (var li = 0; li < 30; li++) {
+      if (days30[li].w === null) { prevX = null; prevY = null; continue; }
+      var cx = toX(li), cy = toY(days30[li].w);
+      if (prevX !== null) html += '<line x1="'+prevX+'" y1="'+prevY+'" x2="'+cx+'" y2="'+cy+'" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>';
+      html += '<circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#111"/>';
+      prevX = cx; prevY = cy;
+    }
+    // 7-day rolling average line
+    var avgPts = [];
+    for (var ai = 0; ai < 30; ai++) {
+      var sum = 0, cnt = 0;
+      for (var aj = Math.max(0, ai-6); aj <= ai; aj++) { if (days30[aj].w !== null) { sum += days30[aj].w; cnt++; } }
+      if (cnt >= 2) avgPts.push({ x: toX(ai), y: toY(sum/cnt) });
+    }
+    if (avgPts.length >= 2) {
+      var pathD = 'M ' + avgPts[0].x + ' ' + avgPts[0].y;
+      for (var ap = 1; ap < avgPts.length; ap++) pathD += ' L ' + avgPts[ap].x + ' ' + avgPts[ap].y;
+      html += '<path d="' + pathD + '" stroke="#2F6B45" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+    html += '</svg>';
+    html += '<div style="display:flex;gap:16px;font-size:10px;color:rgba(0,0,0,0.4);margin-top:2px">';
+    html += '<span><span style="display:inline-block;width:12px;height:2px;background:#111;vertical-align:middle"></span> Daily</span>';
+    html += '<span><span style="display:inline-block;width:12px;height:2.5px;background:#2F6B45;vertical-align:middle"></span> 7-day avg</span>';
+    html += '</div></div>';
+
+    // recent history
+    var recentEntries = days30.filter(function(d){ return d.w !== null; }).slice(-7).reverse();
+    html += '<div class="weight-history">';
+    recentEntries.forEach(function(e) {
+      var dp = new Date(e.ds + 'T12:00:00');
+      var dlbl = dp.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      html += '<div class="weight-history-row"><span class="wdate">'+dlbl+'</span><span>'+e.w+' lbs</span></div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div style="color:rgba(0,0,0,0.3);font-size:13px;padding:12px 0">Log your weight each day to see your trend here.</div>';
+  }
+  html += '</div>';
+
+  // --- Streak card ---
+  html += '<div class="progress-card">';
+  html += '<div class="progress-hdr">🔥 Logging Streak</div>';
+  html += '<div class="streak-row">';
+  html += '<div class="streak-num">' + streak + '</div>';
+  html += '<div><div class="streak-label">' + (streak === 1 ? 'day' : 'days') + ' in a row</div>';
+  if (streak === 0) html += '<div style="font-size:12px;color:rgba(0,0,0,0.4);margin-top:4px">Log something today to start your streak!</div>';
+  else if (streak >= 7) html += '<div style="font-size:12px;color:#2F6B45;margin-top:4px">🎉 Keep it up!</div>';
+  html += '</div></div>';
+  html += '</div>';
+
+  // --- Weekly summary card ---
+  html += '<div class="progress-card">';
+  html += '<div class="progress-hdr">📅 This Week</div>';
+  html += '<div class="weekly-grid">';
+  html += '<div class="weekly-stat"><div class="wval">' + (weekly.daysLogged) + '/7</div><div class="wlbl">Days logged</div></div>';
+  html += '<div class="weekly-stat"><div class="wval">' + (weekly.avgCals != null ? weekly.avgCals : '—') + '</div><div class="wlbl">Avg calories</div></div>';
+  html += '<div class="weekly-stat"><div class="wval">' + (weekly.avgProtein != null ? weekly.avgProtein + 'g' : '—') + '</div><div class="wlbl">Avg protein</div></div>';
+  if (weekly.proteinHitRate != null) {
+    html += '<div class="weekly-stat"><div class="wval">' + weekly.proteinHitRate + '/7</div><div class="wlbl">Protein goal hits</div></div>';
+  } else {
+    html += '<div class="weekly-stat"><div class="wval">' + (weekly.avgWeight != null ? weekly.avgWeight + ' lbs' : '—') + '</div><div class="wlbl">Avg weight</div></div>';
+  }
+  html += '</div>';
+  html += '</div>';
+
+  return html;
 }
 
 // ---------------------------------------------------------------------------
