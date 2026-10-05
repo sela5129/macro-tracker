@@ -570,8 +570,26 @@ function currentDate() { return state.view === 'log' ? state.logDate : state.pla
 function entriesKey() { return (state.view === 'log' ? 'log:' : 'plan:') + currentDate(); }
 function getEntries() { return lsGet(entriesKey(), []); }
 function setEntries(next) { lsSet(entriesKey(), next); }
-function getBurned() { return lsGet('burned:' + state.logDate, 0); }
-function setBurned(v) { lsSet('burned:' + state.logDate, v); }
+function getBurnedEntries() { return lsGet('burned:' + state.logDate, []); }
+function getBurned() {
+  var entries = getBurnedEntries();
+  // backward-compat: old format stored a plain number
+  if (typeof entries === 'number') return entries;
+  return entries.reduce(function(sum, e) { return sum + (e.cal || 0); }, 0);
+}
+function addBurnedEntry(cal, label) {
+  var entries = getBurnedEntries();
+  if (typeof entries === 'number') entries = entries > 0 ? [{ cal: entries, label: 'Workout' }] : [];
+  entries.push({ cal: cal, label: label || 'Workout' });
+  lsSet('burned:' + state.logDate, entries);
+}
+function removeBurnedEntry(idx) {
+  var entries = getBurnedEntries();
+  if (typeof entries === 'number') entries = entries > 0 ? [{ cal: entries, label: 'Workout' }] : [];
+  entries.splice(idx, 1);
+  lsSet('burned:' + state.logDate, entries);
+}
+function clearAllBurned() { lsSet('burned:' + state.logDate, []); }
 
 function isCustomId(id) { return String(id).indexOf('custom-') === 0; }
 
@@ -889,12 +907,32 @@ function render() {
   html += macroRow('Fat', totals.f, 'g', '#9C2B1B');
 
   if (state.view === 'log') {
-    html += '<div class="burned-box"><span class="lbl">Calories burned (\u00bd credit)</span>' +
-      '<div class="stepper">' +
-      '<button data-action="adjustBurned" data-value="-50">\u2212</button>' +
-      '<input id="burned-input" data-field="burned" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="numeric" value="' + burned + '">' +
-      '<button data-action="adjustBurned" data-value="50">+</button>' +
-      '</div></div>';
+    var burnedEntries = getBurnedEntries();
+    if (typeof burnedEntries === 'number') burnedEntries = burnedEntries > 0 ? [{ cal: burnedEntries, label: 'Workout' }] : [];
+    html += '<div class="burned-box" style="flex-direction:column;align-items:stretch;gap:8px">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+    html += '<span class="lbl">🔥 Calories burned (½ credit)</span>';
+    if (burned > 0) html += '<span style="font-size:13px;font-weight:700;font-family:\'SF Mono\',Menlo,monospace">'+burned+' total</span>';
+    html += '</div>';
+    if (burnedEntries.length > 0) {
+      html += '<div style="display:flex;flex-direction:column;gap:4px">';
+      burnedEntries.forEach(function(e, i) {
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.6);padding:4px 8px;border-radius:4px">' +
+          '<span style="font-size:12px;font-weight:600">'+esc(e.label)+'</span>' +
+          '<span style="display:flex;align-items:center;gap:8px">' +
+            '<span style="font-size:12px;font-family:\'SF Mono\',Menlo,monospace">'+e.cal+' cal (+'+Math.round(e.cal/2)+' back)</span>' +
+            '<button data-action="removeBurnedEntry" data-idx="'+i+'" style="background:none;border:0;font-size:14px;color:rgba(0,0,0,0.35);cursor:pointer;padding:0 2px">×</button>' +
+          '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+    html += '<div style="display:flex;align-items:center;gap:6px">' +
+      '<input id="burned-add-input" data-field="burnedAdd" type="number" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="calories" style="flex:1;border:1px solid rgba(0,0,0,0.25);padding:6px 8px;font-size:16px;border-radius:4px;background:#fff">' +
+      '<input id="burned-label-input" data-field="burnedLabel" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="label (e.g. run)" style="flex:1.5;border:1px solid rgba(0,0,0,0.25);padding:6px 8px;font-size:16px;border-radius:4px;background:#fff">' +
+      '<button data-action="addBurnedEntry" style="background:#111;color:#fff;border:0;padding:7px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.02em;border-radius:4px;cursor:pointer;flex-shrink:0">Add</button>' +
+    '</div>';
+    html += '</div>';
   }
   if (state.view === 'plan' && entries.length > 0) {
     html += '<button class="copy-btn" data-action="copyPlanToLog">Copy this plan into ' + prettyDate(state.planDate) + '\'s log</button>';
@@ -1658,8 +1696,17 @@ root.addEventListener('click', function(e) {
     render();
   }
   else if (action === 'toggleGoals') { state.showGoals = !state.showGoals; render(); }
-  else if (action === 'adjustBurned') {
-    setBurned(Math.max(0, getBurned() + Number(value)));
+  else if (action === 'addBurnedEntry') {
+    var calVal = Number((state.burnedAdd || '').toString().trim());
+    if (calVal > 0) {
+      addBurnedEntry(calVal, (state.burnedLabel || 'Workout').trim() || 'Workout');
+      state.burnedAdd = '';
+      state.burnedLabel = '';
+      render();
+    }
+  }
+  else if (action === 'removeBurnedEntry') {
+    removeBurnedEntry(Number(btn.dataset.idx));
     render();
   }
   else if (action === 'copyPlanToLog') { copyPlanToLog(); }
@@ -1767,7 +1814,12 @@ root.addEventListener('input', function(e) {
     render();
     _skipQtyInputReset = false;
   }
-  else if (field === 'burned') { setBurned(Math.max(0, Number(val) || 0)); render(); }
+  else if (field === 'burnedAdd') {
+    state.burnedAdd = val.replace(/\s/g, '');
+  }
+  else if (field === 'burnedLabel') {
+    state.burnedLabel = val;
+  }
   else if (field === 'goals.protein' || field === 'goals.calories') {
     setPath(state, field, val);
     lsSet('goals', state.goals);
