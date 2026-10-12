@@ -548,7 +548,7 @@ var state = {
   qty: 0,
   qtyRaw: '0',
   showCustomForm: false,
-  customDraft: { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' },
+  customDraft: { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '', fb: '' },
   saveCustomForFuture: true,
   showGoals: false,
   toast: '',
@@ -684,9 +684,9 @@ function buildTodayChips(entries) {
 
 function computeTotals(entries) {
   var t = entries.reduce(function(acc, e) {
-    acc.p += e.p * e.qty; acc.c += e.c * e.qty; acc.cb += e.cb * e.qty; acc.f += e.f * e.qty;
+    acc.p += e.p * e.qty; acc.c += e.c * e.qty; acc.cb += e.cb * e.qty; acc.f += e.f * e.qty; acc.fb += (e.fb || 0) * e.qty;
     return acc;
-  }, { p: 0, c: 0, cb: 0, f: 0 });
+  }, { p: 0, c: 0, cb: 0, f: 0, fb: 0 });
   if (state.view === 'log') t.c = Math.max(0, t.c - getBurned() * 0.5);
   return t;
 }
@@ -905,6 +905,7 @@ function render() {
   }
   html += macroRow('Carbs', totals.cb, 'g', '#B5651D');
   html += macroRow('Fat', totals.f, 'g', '#9C2B1B');
+  html += macroRow('Fiber', totals.fb, 'g', '#6B4226');
 
   if (state.view === 'log') {
     var burnedEntries = getBurnedEntries();
@@ -970,7 +971,8 @@ function render() {
       '<label>Calories<input id="custom-cal" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.c" value="' + esc(d.c) + '"></label>' +
       '<label>Protein (g)<input id="custom-protein" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.p" value="' + esc(d.p) + '"></label>' +
       '<label>Carbs (g)<input id="custom-carbs" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.cb" value="' + esc(d.cb) + '"></label>' +
-      '<label>Fat (g)<input id="custom-fat" enterkeyhint="done" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
+      '<label>Fat (g)<input id="custom-fat" enterkeyhint="next" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.f" value="' + esc(d.f) + '"></label>' +
+      '<label>Fiber (g)<input id="custom-fiber" enterkeyhint="done" type=\"text\" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="decimal" data-field="customDraft.fb" value="' + esc(d.fb||'') + '"></label>' +
       '</div>';
     html += '<div class="checkbox-row"><input id="custom-save" type="checkbox" data-field="saveCustomForFuture" ' + (state.saveCustomForFuture?'checked':'') + '> Save to my foods so I can search for it next time</div>';
     html += '<button class="big-btn" data-action="defineCustomFood" ' + (!d.n.trim() ? 'disabled' : '') + '>Next: how much did you have?</button>';
@@ -1005,6 +1007,7 @@ function render() {
       '<label>Protein (g)<input id="edit-protein" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.p" value="' + esc(ed.p) + '"></label>' +
       '<label>Carbs (g)<input id="edit-carbs" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.cb" value="' + esc(ed.cb) + '"></label>' +
       '<label>Fat (g)<input id="edit-fat" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.f" value="' + esc(ed.f) + '"></label>' +
+      '<label>Fiber (g)<input id="edit-fiber" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editDraft.fb" value="' + esc(ed.fb||'') + '"></label>' +
       '</div>';
     html += '<div class="btn-row"><button class="cancel-btn" data-action="cancelEditFood">Cancel</button><button class="save-btn" data-action="saveEditFood">Save</button></div>';
     html += '</div>';
@@ -1139,7 +1142,7 @@ function render() {
       var checked = !!state.selectedForCombine[String(e.id)];
       html += '<div class="entry' + (checked ? ' entry-selected' : '') + '">' +
         '<input type="checkbox" class="entry-cb" data-action="toggleCombineEntry" data-id="' + e.id + '"' + (checked?' checked':'') + '>' +
-        '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + '</div></div>' +
+        '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + (e.fb ? ' Fb' + round1((e.fb||0)*e.qty) : '') + '</div></div>' +
         '<div class="entry-actions">' +
           '<button data-action="duplicateEntry" data-id="' + e.id + '" aria-label="Repeat this">\uD83D\uDCCB</button>' +
           '<button data-action="removeEntry" data-id="' + e.id + '" aria-label="Delete">\uD83D\uDDD1</button>' +
@@ -1237,7 +1240,7 @@ function pickRecent(r) {
 function confirmAdd() {
   if (!state.picked || !state.qty || state.qty <= 0) return;
   var p = state.picked;
-  var entry = { id: Date.now() + Math.random(), n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, qty: state.qty };
+  var entry = { id: Date.now() + Math.random(), n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, fb: p.fb || 0, qty: state.qty };
   var entries = getEntries();
   if (state.view === 'log') recordPair(entry, entries);
   entries.push(entry);
@@ -1245,7 +1248,7 @@ function confirmAdd() {
 
   // bump this food to the front of "recently logged", deduped by name+unit
   var filtered = state.recentFoods.filter(function(r){ return !(r.n === p.n && r.u === p.u); });
-  var nextRecents = [{ id: 'recent-' + p.n + '-' + p.u, n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, qty: state.qty }].concat(filtered).slice(0, 12);
+  var nextRecents = [{ id: 'recent-' + p.n + '-' + p.u, n: p.n, u: p.u, p: p.p, c: p.c, cb: p.cb, f: p.f, fb: p.fb || 0, qty: state.qty }].concat(filtered).slice(0, 12);
   state.recentFoods = nextRecents;
   lsSet('recentFoods', nextRecents);
 
@@ -1277,7 +1280,7 @@ function duplicateEntry(id) {
 
   // treat it like a fresh log too — bump to front of recents
   var filtered = state.recentFoods.filter(function(r){ return !(r.n === original.n && r.u === original.u); });
-  var nextRecents = [{ id: 'recent-' + original.n + '-' + original.u, n: original.n, u: original.u, p: original.p, c: original.c, cb: original.cb, f: original.f, qty: original.qty }].concat(filtered).slice(0, 12);
+  var nextRecents = [{ id: 'recent-' + original.n + '-' + original.u, n: original.n, u: original.u, p: original.p, c: original.c, cb: original.cb, f: original.f, fb: original.fb || 0, qty: original.qty }].concat(filtered).slice(0, 12);
   state.recentFoods = nextRecents;
   lsSet('recentFoods', nextRecents);
 
@@ -1392,7 +1395,7 @@ function defineCustomFood() {
   var food = {
     id: 'custom-' + Date.now(),
     n: name, u: unit,
-    p: (Number(d.p)||0) / amount, c: (Number(d.c)||0) / amount, cb: (Number(d.cb)||0) / amount, f: (Number(d.f)||0) / amount,
+    p: (Number(d.p)||0) / amount, c: (Number(d.c)||0) / amount, cb: (Number(d.cb)||0) / amount, f: (Number(d.f)||0) / amount, fb: (Number(d.fb)||0) / amount,
   };
   if (state.saveCustomForFuture) {
     var already = state.customFoods.some(function(cf){ return cf.n.toLowerCase() === name.toLowerCase(); });
@@ -1406,7 +1409,7 @@ function defineCustomFood() {
   state.defaultAmounts[daKey] = amount;
   lsSet('defaultAmounts', state.defaultAmounts);
 
-  state.customDraft = { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '' };
+  state.customDraft = { n: '', amount: '', unit: 'g', p: '', c: '', cb: '', f: '', fb: '' };
   state.showCustomForm = false;
   pickFood(food);
   state.qty = amount; state.qtyRaw = String(amount);
@@ -1437,6 +1440,7 @@ function startEditFood(id) {
     p:  String(round1(food.p  * refAmount)),
     cb: String(round1(food.cb * refAmount)),
     f:  String(round1(food.f  * refAmount)),
+    fb: String(round1((food.fb || 0) * refAmount)),
   };
   state.confirmDeleteId = null;
   render();
@@ -1461,6 +1465,7 @@ function saveEditFood() {
     c:  (Number(d.c)  || 0) / amount,
     cb: (Number(d.cb) || 0) / amount,
     f:  (Number(d.f)  || 0) / amount,
+    fb: (Number(d.fb) || 0) / amount,
   };
   if (isCustomId(id)) {
     state.customFoods = state.customFoods.map(function(f) {
@@ -1661,7 +1666,7 @@ root.addEventListener('focusout', function(e) {
 });
 
 // Auto-advance between custom food form fields on Enter / "Next" key
-var CUSTOM_FIELD_ORDER = ['custom-name','custom-amount','custom-cal','custom-protein','custom-carbs','custom-fat'];
+var CUSTOM_FIELD_ORDER = ['custom-name','custom-amount','custom-cal','custom-protein','custom-carbs','custom-fat','custom-fiber'];
 root.addEventListener('keydown', function(e) {
   if (e.key !== 'Enter' && e.key !== 'Next') return;
   var id = e.target.id;
@@ -1829,7 +1834,7 @@ root.addEventListener('input', function(e) {
   }
   else if (field.indexOf('customDraft.') === 0) {
     // strip iOS spaces on numeric sub-fields
-    var isNumField = ['customDraft.amount','customDraft.c','customDraft.p','customDraft.cb','customDraft.f'].indexOf(field) !== -1;
+    var isNumField = ['customDraft.amount','customDraft.c','customDraft.p','customDraft.cb','customDraft.f','customDraft.fb'].indexOf(field) !== -1;
     var cleanedVal = isNumField ? val.replace(/\s/g, '') : val;
     setPath(state, field, cleanedVal);
     // only patch the DOM minimally — no full rebuild so the keyboard stays attached
@@ -1842,7 +1847,7 @@ root.addEventListener('input', function(e) {
     if (submitBtn) submitBtn.disabled = !state.customDraft.n.trim();
   }
   else if (field.indexOf('editDraft.') === 0) {
-    var isNumEditField = ['editDraft.amount','editDraft.c','editDraft.p','editDraft.cb','editDraft.f'].indexOf(field) !== -1;
+    var isNumEditField = ['editDraft.amount','editDraft.c','editDraft.p','editDraft.cb','editDraft.f','editDraft.fb'].indexOf(field) !== -1;
     var cleanedEdit = isNumEditField ? val.replace(/\s/g, '') : val;
     setPath(state, field, cleanedEdit);
     // strip space in DOM if needed, no full rebuild
