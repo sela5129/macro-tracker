@@ -1164,6 +1164,7 @@ function render() {
         '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + (e.fb ? ' Fb' + round1((e.fb||0)*e.qty) : '') + '</div></div>' +
         '<div class="entry-actions">' +
           '<button data-action="duplicateEntry" data-id="' + e.id + '" aria-label="Repeat this">\uD83D\uDCCB</button>' +
+          '<button data-action="openCopyItem" data-id="' + e.id + '" aria-label="Copy to another day" style="font-size:14px">\u27A1\uFE0F</button>' +
           '<button data-action="removeEntry" data-id="' + e.id + '" aria-label="Delete">\uD83D\uDDD1</button>' +
         '</div></div>';
     });
@@ -1802,6 +1803,23 @@ root.addEventListener('click', function(e) {
   else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); state.qtyRaw = String(state.qty); render(); }
   else if (action === 'confirmAdd') { confirmAdd(); }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
+  else if (action === 'undoDelete') { undoDelete(); }
+  else if (action === 'openCopyItem') {
+    var ciEntry = getEntries().find(function(e){ return String(e.id) === String(btn.dataset.id); });
+    if (ciEntry) { state.copyItemTarget = { entry: ciEntry, date: shiftDate(currentDate(), 1), view: 'log' }; render(); }
+  }
+  else if (action === 'cancelCopyItem') { state.copyItemTarget = null; render(); }
+  else if (action === 'performCopyItem') {
+    var ci = state.copyItemTarget;
+    if (ci) {
+      var ciKey = (ci.view === 'log' ? 'log:' : 'plan:') + ci.date;
+      var ciList = lsGet(ciKey, []);
+      ciList.push(Object.assign({}, ci.entry, { id: Date.now() + Math.random() }));
+      lsSet(ciKey, ciList);
+      state.copyItemTarget = null;
+      showToast('✓ Copied to ' + (ci.view === 'plan' ? 'plan' : 'log') + ' for ' + prettyDate(ci.date));
+    }
+  }
   else if (action === 'duplicateEntry') { duplicateEntry(btn.dataset.id); }
   else if (action === 'toggleCombineEntry') { toggleCombineEntry(btn.dataset.id); }
   else if (action === 'combineSelected') { combineSelected(); }
@@ -1916,6 +1934,9 @@ root.addEventListener('input', function(e) {
     state.copyDayTarget.date = val;
     render();
   }
+  else if (field === 'copyItemTarget.date') {
+    if (state.copyItemTarget) { state.copyItemTarget.date = val; render(); }
+  }
   else if (field === 'importText') {
     state.importText = val;
     render();
@@ -1991,6 +2012,7 @@ root.addEventListener('change', function(e) {
   else if (field === 'customDraft.unit') { state.customDraft.unit = e.target.value; render(); }
   else if (field === 'editDraft.u') { state.editDraft.u = e.target.value; render(); }
   else if (field === 'copyDayTarget.view') { state.copyDayTarget.view = e.target.value; render(); }
+  else if (field === 'copyItemTarget.view') { if (state.copyItemTarget) { state.copyItemTarget.view = e.target.value; render(); } }
 });
 
 // ---------------------------------------------------------------------------
