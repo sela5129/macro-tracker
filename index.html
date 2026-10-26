@@ -215,6 +215,11 @@
   .amt-row select { flex:1; border:2px solid rgba(0,0,0,0.2); padding:10px 8px; font-size:16px; background:#fff; }
   .entry button { background:none; border:0; font-size:18px; color:rgba(0,0,0,0.4); padding:6px; cursor:pointer; }
   .entry-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+  .entry-qty-editor { display:flex; align-items:center; gap:6px; padding:6px 0 2px; flex-wrap:wrap; }
+  .entry-qty-editor input[type=text] { width:68px; text-align:center; font-size:18px; font-weight:700; border:0; border-bottom:2px solid #111; background:none; padding:2px 0; font-family:'SF Mono',Menlo,monospace; }
+  .entry-qty-editor .eq-step { font-size:22px; font-weight:700; background:none; border:none; padding:0 4px; color:#111; cursor:pointer; line-height:1; }
+  .entry-qty-editor .eq-save { background:#2F6B45; color:#fff; border:none; border-radius:6px; font-size:13px; font-weight:600; padding:4px 12px; cursor:pointer; }
+  .entry-qty-editor .eq-cancel { background:none; border:none; font-size:13px; color:#888; padding:4px 6px; cursor:pointer; }
   .entry-actions button:active { color:#111; }
   .footer-note { text-align:center; font-size:11px; color:rgba(0,0,0,0.3); margin-top:24px; }
   .sync-wrap { margin-top:10px; text-align:center; }
@@ -567,6 +572,8 @@ var state = {
   importText: null,
   undoStack: [],        // [{entries, key, entry}] for undo delete
   copyItemTarget: null, // {entry, date, view} when copying a single item
+  editingEntryId: null,
+  editingEntryQty: '',
 };
 state.openCats[CATEGORY_ORDER[0]] = true;
 
@@ -1159,10 +1166,22 @@ function render() {
   } else {
     entries.forEach(function(e) {
       var checked = !!state.selectedForCombine[String(e.id)];
+      var isEditingThis = String(state.editingEntryId) === String(e.id);
+      var step = UNIT_STEP[e.u] || 1;
       html += '<div class="entry' + (checked ? ' entry-selected' : '') + '">' +
         '<input type="checkbox" class="entry-cb" data-action="toggleCombineEntry" data-id="' + e.id + '"' + (checked?' checked':'') + '>' +
-        '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + (e.fb ? ' Fb' + round1((e.fb||0)*e.qty) : '') + '</div></div>' +
+        '<div class="entry-body"><div class="name">' + esc(e.n) + '</div><div class="meta">' + e.qty + UNIT_LABEL[e.u] + ' \u00b7 ' + round1(e.c*e.qty) + ' cal \u00b7 P' + round1(e.p*e.qty) + ' C' + round1(e.cb*e.qty) + ' F' + round1(e.f*e.qty) + (e.fb ? ' Fb' + round1((e.fb||0)*e.qty) : '') + '</div>' +
+        (isEditingThis ? '<div class="entry-qty-editor">' +
+          '<button class="eq-step" data-action="entryQtyStep" data-id="' + e.id + '" data-step="-' + step + '">\u2212</button>' +
+          '<input id="eqi-' + e.id + '" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-field="editingEntryQty" value="' + esc(state.editingEntryQty) + '">' +
+          '<button class="eq-step" data-action="entryQtyStep" data-id="' + e.id + '" data-step="' + step + '">+</button>' +
+          '<span style="font-size:13px;color:#666">' + esc(UNIT_LABEL[e.u]) + '</span>' +
+          '<button class="eq-save" data-action="saveEntryQty" data-id="' + e.id + '">Save</button>' +
+          '<button class="eq-cancel" data-action="cancelEntryEdit">Cancel</button>' +
+        '</div>' : '') +
+        '</div>' +
         '<div class="entry-actions">' +
+          '<button data-action="startEntryEdit" data-id="' + e.id + '" aria-label="Edit quantity" style="font-size:13px;background:none;border:none;color:#888;padding:2px 3px;cursor:pointer;">\u270E</button>' +
           '<button data-action="duplicateEntry" data-id="' + e.id + '" aria-label="Repeat this">\uD83D\uDCCB</button>' +
           '<button data-action="openCopyItem" data-id="' + e.id + '" aria-label="Copy to another day" style="font-size:14px">\u27A1\uFE0F</button>' +
           '<button data-action="removeEntry" data-id="' + e.id + '" aria-label="Delete">\uD83D\uDDD1</button>' +
@@ -1287,6 +1306,29 @@ function confirmAdd() {
   render();
 }
 
+function startEntryEdit(id) {
+  var e = getEntries().find(function(x){ return String(x.id) === String(id); });
+  if (!e) return;
+  state.editingEntryId = id;
+  state.editingEntryQty = String(e.qty);
+  render();
+}
+function cancelEntryEdit() {
+  state.editingEntryId = null;
+  state.editingEntryQty = '';
+  render();
+}
+function saveEntryQty(id) {
+  var newQty = parseFloat(state.editingEntryQty);
+  if (!newQty || newQty <= 0) { cancelEntryEdit(); return; }
+  var entries = getEntries().map(function(e) {
+    return String(e.id) === String(id) ? Object.assign({}, e, { qty: round1(newQty) }) : e;
+  });
+  setEntries(entries);
+  state.editingEntryId = null;
+  state.editingEntryQty = '';
+  render();
+}
 function removeEntry(id) {
   var allEntries = getEntries();
   var removed = allEntries.find(function(e){ return String(e.id) === String(id); });
@@ -1802,6 +1844,17 @@ root.addEventListener('click', function(e) {
   else if (action === 'closePicked') { state.picked = null; state.qty = 0; render(); }
   else if (action === 'adjustQty') { state.qty = Math.max(0, round1((state.qty||0) + Number(value))); state.qtyRaw = String(state.qty); render(); }
   else if (action === 'confirmAdd') { confirmAdd(); }
+  else if (action === 'startEntryEdit') { startEntryEdit(btn.dataset.id); }
+  else if (action === 'cancelEntryEdit') { cancelEntryEdit(); }
+  else if (action === 'saveEntryQty') { saveEntryQty(btn.dataset.id); }
+  else if (action === 'entryQtyStep') {
+    var newQ = round1((parseFloat(state.editingEntryQty) || 0) + Number(btn.dataset.step));
+    if (newQ < 0) newQ = 0;
+    state.editingEntryQty = String(newQ);
+    render();
+    var inp = document.getElementById('eqi-' + btn.dataset.id);
+    if (inp) { inp.focus(); inp.select(); }
+  }
   else if (action === 'removeEntry') { removeEntry(btn.dataset.id); }
   else if (action === 'undoDelete') { undoDelete(); }
   else if (action === 'openCopyItem') {
@@ -1936,6 +1989,11 @@ root.addEventListener('input', function(e) {
   }
   else if (field === 'copyItemTarget.date') {
     if (state.copyItemTarget) { state.copyItemTarget.date = val; render(); }
+  }
+  else if (field === 'editingEntryQty') {
+    state.editingEntryQty = val.replace(/[^0-9.]/g, '');
+    var inp = e.target;
+    if (inp && inp.value !== state.editingEntryQty) inp.value = state.editingEntryQty;
   }
   else if (field === 'importText') {
     state.importText = val;
